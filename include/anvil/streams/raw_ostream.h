@@ -1,8 +1,10 @@
 #pragma once
+#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <string_view>
+#include <system_error>
 
 namespace anvil {
 
@@ -157,6 +159,22 @@ public:
 #undef integet_op
 
     // NOLINTEND(bugprone-macro-parentheses)
+
+    RawOstream &
+    operator<< (double num) {
+        char localBuf[64];
+        auto [ptr, ec] = std::to_chars (localBuf, localBuf + sizeof (localBuf), num);
+
+        if (ec == std::errc ()) {
+            Write (localBuf, ptr - localBuf);
+        }
+        return *this;
+    }
+
+    RawOstream &
+    operator<< (float num) {
+        return *this << static_cast<double> (num);
+    }
 };
 
 extern RawOstream &
