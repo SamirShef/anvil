@@ -12,7 +12,7 @@ NamespaceIndentation: None
 PointerAlignment: Right
 SpaceAfterCStyleCast: true
 SortIncludes: true
-IncludeBlocks: Regroup
+IncludeBlocks: Merge
 SpacesBeforeTrailingComments: 1
 SpaceAfterTemplateKeyword: true
 AlwaysBreakTemplateDeclarations: MultiLine
