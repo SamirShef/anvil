@@ -1,5 +1,5 @@
+#pragma once
 #include "anvil/streams/raw_ostream.h"
-
 #include <string>
 
 namespace anvil {

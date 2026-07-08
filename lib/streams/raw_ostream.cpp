@@ -6,13 +6,21 @@ namespace anvil {
 
 RawOstream &
 Outs () {
+#ifdef _WIN32
+    static RawFdOstream outs (GetStdHandle (STD_OUTPUT_HANDLE));
+#else
     static RawFdOstream outs (1);
+#endif
     return outs;
 }
 
 RawOstream &
 Errs () {
+#ifdef _WIN32
+    static RawFdOstream errs (GetStdHandle (STD_ERROR_HANDLE));
+#else
     static RawFdOstream errs (2);
+#endif
     return errs;
 }
 

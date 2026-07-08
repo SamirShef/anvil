@@ -2,9 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <fcntl.h>
 #include <string_view>
-#include <unistd.h>
 
 namespace anvil {
 
@@ -35,12 +33,9 @@ IntToStr (int64_t num, char *buf) {
     } else {
         bool isNeg = num < 0;
         if (isNeg) {
-            num = -num;
-        }
-        while (num > 0) {
-            *--p = '0' + (num % 10); // NOLINT(bugprone-narrowing-conversions,
-                                     // cppcoreguidelines-narrowing-conversions)
-            num /= 10;
+            p = IntToStr (-static_cast<uint64_t> (num), buf);
+        } else {
+            p = IntToStr (static_cast<uint64_t> (num), buf);
         }
         if (isNeg) {
             *--p = '-';

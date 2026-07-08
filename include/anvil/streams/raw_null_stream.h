@@ -1,3 +1,4 @@
+#pragma once
 #include "anvil/streams/raw_ostream.h"
 
 namespace anvil {
