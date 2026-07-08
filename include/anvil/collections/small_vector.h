@@ -6,7 +6,7 @@
 namespace anvil {
 
 template <typename T, size_t N> class SmallVector {
-    alignas (T) char _inlineBuf[N * sizeof (T)]{};
+    alignas (T) char _inlineBuf[(N == 0 ? 1 : N) * sizeof (T)]{};
     T     *_data = nullptr;
     size_t _len  = 0;
     size_t _cap  = N;
