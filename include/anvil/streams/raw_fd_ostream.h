@@ -63,6 +63,26 @@ public:
 #endif
     }
 
+    explicit RawFdOstream (const char *filename)
+        : RawOstream (4096), _shouldClose (true) {
+#ifdef _WIN32
+        _handle = CreateFileA (
+            filename,
+            GENERIC_WRITE,
+            FILE_SHARE_READ,
+            nullptr,
+            CREATE_ALWAYS,
+            FILE_ATTRIBUTE_NORMAL,
+            nullptr);
+#else
+        // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
+        _fd = ::open (filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+#endif
+    }
+
+    explicit RawFdOstream (const std::string &filename)
+        : RawFdOstream (filename.c_str ()) {}
+
     ~RawFdOstream () override {
         FlushBuffer ();
 #ifdef _WIN32
