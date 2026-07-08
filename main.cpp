@@ -1,7 +1,7 @@
-#include <iostream>
+#include "anvil/streams/raw_ostream.h"
 
 int
 main () {
-    std::cout << "Hello from anvil!\n";
+    anvil::Outs () << "Hello from anvil's ostream!\n";
     return 0;
 }

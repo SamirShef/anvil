@@ -8,7 +8,10 @@ Checks: >
   -cppcoreguidelines-pro-type-cstyle-cast, -hicpp-avoid-c-arrays,
   -cppcoreguidelines-avoid-c-arrays, -modernize-avoid-c-arrays,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay, -hicpp-no-array-decay,
-  -cert-err58-cpp, -cppcoreguidelines-avoid-magic-numbers
+  -cert-err58-cpp, -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-avoid-const-or-ref-data-members
 
 WarningsAsErrors: "*"
 
