@@ -8,6 +8,47 @@
 
 namespace anvil {
 
+static char *
+IntToStr (uint64_t num, char *buf) {
+    char *p = buf + 20;
+    *p      = '\0';
+
+    if (num == 0) {
+        *--p = '0';
+    } else {
+        while (num > 0) {
+            *--p = '0' + (num % 10); // NOLINT(bugprone-narrowing-conversions,
+                                     // cppcoreguidelines-narrowing-conversions)
+            num /= 10;
+        }
+    }
+    return p;
+}
+
+static char *
+IntToStr (int64_t num, char *buf) {
+    char *p = buf + 20;
+    *p      = '\0';
+
+    if (num == 0) {
+        *--p = '0';
+    } else {
+        bool isNeg = num < 0;
+        if (isNeg) {
+            num = -num;
+        }
+        while (num > 0) {
+            *--p = '0' + (num % 10); // NOLINT(bugprone-narrowing-conversions,
+                                     // cppcoreguidelines-narrowing-conversions)
+            num /= 10;
+        }
+        if (isNeg) {
+            *--p = '-';
+        }
+    }
+    return p;
+}
+
 class RawOstream {
 protected:
     char *_bufStart = nullptr;
@@ -81,22 +122,46 @@ public:
     }
 
     RawOstream &
-    operator<< (uint64_t num) {
-        char  localBuf[21];
-        char *p = localBuf + 20;
-        *p      = '\0';
-
-        if (num == 0) {
-            *--p = '0';
-        } else {
-            while (num > 0) {
-                *--p = '0' + (num % 10); // NOLINT(bugprone-narrowing-conversions,
-                                         // cppcoreguidelines-narrowing-conversions)
-                num /= 10;
-            }
-        }
-        return *this << p;
+    operator<< (unsigned char c) {
+        Write ((const char *) &c, 1);
+        return *this;
     }
+
+    RawOstream &
+    operator<< (signed char c) {
+        Write ((const char *) &c, 1);
+        return *this;
+    }
+
+    RawOstream &
+    operator<< (char c) {
+        Write ((const char *) &c, 1);
+        return *this;
+    }
+
+    // NOLINTBEGIN(bugprone-macro-parentheses)
+#define integet_op(prefix, bits)                                                         \
+    RawOstream &operator<< (prefix##int##bits##_t num) {                                 \
+        char localBuf[21];                                                               \
+        return *this << IntToStr (static_cast<prefix##int64_t> (num), localBuf);         \
+    }
+
+#define uint_op(bits) integet_op (u, bits)
+#define int_op(bits) integet_op (, bits)
+
+    uint_op (16);
+    uint_op (32);
+    uint_op (64);
+
+    int_op (16);
+    int_op (32);
+    int_op (64);
+
+#undef uint_op
+#undef int_op
+#undef integet_op
+
+    // NOLINTEND(bugprone-macro-parentheses)
 };
 
 extern RawOstream &
