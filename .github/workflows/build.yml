@@ -8,35 +8,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release]
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup MSYS2 (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          update: true
-          install: >-
-            mingw-w64-ucrt-x86_64-clang-21 mingw-w64-ucrt-x86_64-cmake
-            mingw-w64-ucrt-x86_64-ninja
-
-      - name: Build (Unix)
-        if: matrix.os != 'windows-latest'
+      - name: Configure CMake
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          cmake --build build --config ${{ matrix.build_type }} --parallel $(nproc)
 
-      - name: Build (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: msys2 {0}
+      - name: Build Project
         run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          cmake --build build --config ${{ matrix.build_type }} --parallel $(nproc)
+          cmake --build build --config ${{ matrix.build_type }} --parallel
 
       - name: Upload
         uses: actions/upload-artifact@v4
