@@ -33,13 +33,39 @@ class SmallVector {
 
 public:
     SmallVector (const SmallVector &) = delete;
-    SmallVector (SmallVector &&)      = delete;
     SmallVector &
     operator= (const SmallVector &) = delete;
     SmallVector &
-    operator= (SmallVector &&) = delete;
+    operator= (SmallVector &&) = default;
 
     SmallVector () : _data ((T *) (_inlineBuf)) {}
+
+    SmallVector (std::initializer_list<T> init) {
+        if (init.size () <= N) {
+            _data = (T *) (_inlineBuf);
+            _cap  = N;
+        } else {
+            _data = static_cast<T *> (std::malloc (init.size () * sizeof (T)));
+            _cap  = init.size ();
+        }
+
+        for (const auto &elem : init) {
+            ::new (&_data[_len++]) T (elem);
+        }
+    }
+
+    SmallVector (SmallVector &&other) noexcept : _len (other._len), _cap (other._cap) {
+        if (other._cap == N) {
+            _data = (T *) _inlineBuf;
+            for (size_t i = 0; i < _len; ++i) {
+                ::new (&_data[i]) T (std::move (other._data[i]));
+                other._data[i].~T ();
+            }
+        } else {
+            _data       = other._data;
+            other._data = (T *) other._inlineBuf;
+        }
+    }
 
     ~SmallVector () {
         for (size_t i = 0; i < _len; ++i) {
@@ -76,6 +102,16 @@ public:
     At (size_t index) const {
         assert (index < _len && "Index out of range");
         return _data[index];
+    }
+
+    T &
+    operator[] (size_t index) {
+        return At (index);
+    }
+
+    const T &
+    operator[] (size_t index) const {
+        return At (index);
     }
 
     size_t

@@ -22,9 +22,14 @@ public:
     operator= (Context &&) = default;
     ~Context ()            = default;
 
+    ArenaAllocator &
+    Allocator () {
+        return _arena;
+    }
+
     IntegerType *
     GetIntTy (unsigned width) {
-        if (auto *ty = _intTypes.Find (width); ty != nullptr) {
+        if (auto *ty = _intTypes.Find (width)) {
             return *ty;
         }
         auto *ty = _arena.Alloc<IntegerType> ();

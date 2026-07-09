@@ -1,5 +1,6 @@
 #pragma once
 #include "anvil/core/constant.h"
+#include "anvil/streams/raw_ostream.h"
 #include "anvil/support/casting.h"
 #include <cstdint>
 
@@ -14,22 +15,33 @@ class ConstantInt : public Constant {
         : _val (val), Constant (Constant::Integer, type) {}
 
 public:
+    RawOstream &
+    Print (RawOstream &os) override {
+        return PrintAsOperand (os);
+    }
+
+    RawOstream &
+    PrintAsOperand (RawOstream &os) override {
+        os << _val;
+        return os;
+    }
+
     uint64_t
     Val () const {
         return _val;
     }
 
     static bool
-    CalssOf (Value *val) {
-        if (val->GetKind () == Value::Constant) {
+    ClassOf (Value *val) {
+        if (val->GetKind () == Value::Kind::Constant) {
             return ConstantInt::ClassOf (Cast<Constant> (val));
         }
         return false;
     }
 
     static bool
-    CalssOf (const Value *val) {
-        if (val->GetKind () == Value::Constant) {
+    ClassOf (const Value *val) {
+        if (val->GetKind () == Value::Kind::Constant) {
             return ConstantInt::ClassOf (Cast<Constant> (val));
         }
         return false;
