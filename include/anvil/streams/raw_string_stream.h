@@ -24,7 +24,9 @@ public:
 
     explicit RawStringStream (std::string &str) : RawOstream (0), _targetStr (str) {}
 
-    ~RawStringStream () override { FlushBuffer (); }
+    ~RawStringStream () override {
+        FlushBuffer ();
+    }
 };
 
 }

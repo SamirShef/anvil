@@ -38,6 +38,7 @@ public:
     operator= (const SmallVector &) = delete;
     SmallVector &
     operator= (SmallVector &&) = delete;
+
     SmallVector () : _data ((T *) (_inlineBuf)) {}
 
     ~SmallVector () {
@@ -81,6 +82,7 @@ public:
     Size () const {
         return _len;
     }
+
     size_t
     Capacity () const {
         return _cap;
