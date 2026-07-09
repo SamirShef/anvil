@@ -175,6 +175,11 @@ public:
     operator<< (float num) {
         return *this << static_cast<double> (num);
     }
+
+    RawOstream &
+    operator<< (bool flag) {
+        return *this << (flag ? "true" : "false");
+    }
 };
 
 extern RawOstream &
