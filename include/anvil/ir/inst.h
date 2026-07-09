@@ -12,7 +12,7 @@ class Inst : public Value {
     friend class BasicBlock;
 
 public:
-    enum OpCode : uint8_t { Add, Sub };
+    enum OpCode : uint8_t { Add, Sub, Ret };
 
 protected:
     OpCode                  _opcode;

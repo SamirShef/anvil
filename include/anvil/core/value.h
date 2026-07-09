@@ -11,7 +11,7 @@ class Use;
 
 class Value {
 protected:
-    enum class Kind : uint8_t { Constant, Inst, BasicBlock } _kind;
+    enum class Kind : uint8_t { Constant, Inst, BasicBlock, Argument, Function } _kind;
 
     Type            *_type;
     std::string_view _name;
@@ -57,6 +57,11 @@ public:
     std::string_view
     GetName () const {
         return _name;
+    }
+
+    void
+    SetName (std::string_view name) {
+        _name = name;
     }
 
     Use *

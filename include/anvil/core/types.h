@@ -8,7 +8,7 @@ class Context;
 
 class Type {
 protected:
-    enum Kind : uint8_t { Integer } _kind;
+    enum Kind : uint8_t { Integer, Function } _kind;
 
     explicit Type (Kind kind) : _kind (kind) {}
 

@@ -4,7 +4,9 @@
 #include "anvil/core/value.h"
 #include "anvil/ir/basic_block.h"
 #include "anvil/ir/binary_op.h"
+#include "anvil/ir/function.h"
 #include "anvil/ir/inst.h"
+#include "anvil/ir/ret_inst.h"
 #include <cassert>
 
 namespace anvil {
@@ -42,9 +44,11 @@ public:
     }
 
     BasicBlock *
-    CreateBasicBlock (std::string_view name = "") {
+    CreateBasicBlock (Function *parent, std::string_view name = "") {
         auto *mem = _ctx.Allocator ().Alloc<BasicBlock> ();
-        return ::new (mem) BasicBlock (name);
+        auto *bb  = ::new (mem) BasicBlock (name);
+        parent->AddBasicBlock (bb);
+        return bb;
     }
 
     Value *
@@ -54,6 +58,7 @@ public:
             lhs->GetType () == rhs->GetType ()
             && "Binary operator must have the same operand types");
 
+        // TODO: uncomment
         // if (auto *folded = foldIfCan (opcode, lhs, rhs)) {
         //     return folded;
         // }
@@ -73,6 +78,16 @@ public:
     Value *
     CreateSub (Value *lhs, Value *rhs, std::string_view name = "") {
         return CreateBinaryOperator (Inst::OpCode::Sub, lhs, rhs, name);
+    }
+
+    Value *
+    CreateRet (Value *ret) {
+        auto *mem  = _ctx.Allocator ().Alloc<RetInst> ();
+        auto *inst = ::new (mem) RetInst (ret);
+        if (_insertBlock != nullptr) {
+            _insertBlock->AddInst (inst, _insertPoint);
+        }
+        return inst;
     }
 
     IntegerType *

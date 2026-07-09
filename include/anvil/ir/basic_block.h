@@ -7,8 +7,11 @@
 namespace anvil {
 
 class BasicBlock : public Value {
-    Inst *_start{};
-    Inst *_end{};
+    friend class Function;
+    Inst       *_start{};
+    Inst       *_end{};
+    BasicBlock *_prev{};
+    BasicBlock *_next{};
 
 public:
     explicit BasicBlock (std::string_view name = "")
@@ -78,6 +81,21 @@ public:
     bool
     IsEmpty () const {
         return _start == nullptr;
+    }
+
+    BasicBlock *
+    Next () const {
+        return _next;
+    }
+
+    bool
+    HasTerminator () const {
+        return _end != nullptr && _end->Opcode () == Inst::OpCode::Ret;
+    }
+
+    Inst *
+    Terminator () const {
+        return HasTerminator () ? _end : nullptr;
     }
 
     static bool
