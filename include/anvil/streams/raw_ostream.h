@@ -175,6 +175,12 @@ public:
     operator<< (float num) {
         return *this << static_cast<double> (num);
     }
+
+    RawOstream &
+    operator<< (void *ptr) {
+        auto addr = (uint64_t) (ptr);
+        return *this << addr;
+    }
 };
 
 extern RawOstream &
