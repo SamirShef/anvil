@@ -36,3 +36,5 @@ BinPackParameters: false
 AllowAllArgumentsOnNextLine: false
 ContinuationIndentWidth: 4
 AlignArrayOfStructures: Left
+SeparateDefinitionBlocks: Always
+WrapNamespaceBodyWithEmptyLines: Always
