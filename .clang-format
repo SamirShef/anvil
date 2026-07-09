@@ -4,8 +4,8 @@ IndentWidth: 4
 TabWidth: 4
 UseTab: Never
 ColumnLimit: 90
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 NamespaceIndentation: None
@@ -15,7 +15,7 @@ SortIncludes: true
 IncludeBlocks: Merge
 SpacesBeforeTrailingComments: 1
 SpaceAfterTemplateKeyword: true
-AlwaysBreakTemplateDeclarations: MultiLine
+BreakTemplateDeclarations: Yes
 ReflowComments: true
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
@@ -36,3 +36,5 @@ BinPackParameters: false
 AllowAllArgumentsOnNextLine: false
 ContinuationIndentWidth: 4
 AlignArrayOfStructures: Left
+SeparateDefinitionBlocks: Always
+WrapNamespaceBodyWithEmptyLines: Always
