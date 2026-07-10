@@ -15,6 +15,11 @@ public:
     MachineModule (MachineContext &ctx, std::string_view name)
         : _ctx (ctx), _name (name) {}
 
+    MachineContext &
+    Context () {
+        return _ctx;
+    }
+
     void
     AddFunction (MachineFunction *func) {
         if (_funcsEnd == nullptr) {

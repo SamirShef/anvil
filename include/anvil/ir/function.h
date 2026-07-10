@@ -131,6 +131,31 @@ public:
             _end         = block;
         }
     }
+
+    bool
+    IsDeclaration () const {
+        return _start == nullptr;
+    }
+
+    BasicBlock *
+    Start () const {
+        return _start;
+    }
+
+    BasicBlock *
+    End () const {
+        return _end;
+    }
+
+    Function *
+    Prev () const {
+        return _prev;
+    }
+
+    Function *
+    Next () const {
+        return _next;
+    }
 };
 
 }

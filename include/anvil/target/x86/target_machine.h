@@ -1,7 +1,9 @@
 #pragma once
+#include "anvil/target/machine_module.h"
 #include "anvil/target/target_machine.h"
+#include "anvil/target/x86/x86_inst_selector.h"
 
-namespace anvil {
+namespace anvil::x86 {
 
 class X86TargetMachine : public TargetMachine {
 public:
@@ -9,7 +11,9 @@ public:
 
     void
     SelectInstructions (Module &inMod, MachineModule &outMod) override {
-        // TODO: implement
+        auto                       &mctx = outMod.Context ();
+        x86::X86InstructionSelector selector (mctx);
+        selector.SelectInstructions (inMod, outMod);
     }
 };
 

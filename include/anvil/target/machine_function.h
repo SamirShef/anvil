@@ -58,6 +58,16 @@ public:
     BlockEnd () const {
         return _blocksEnd;
     }
+
+    MachineFunction *
+    Prev () const {
+        return _prev;
+    }
+
+    MachineFunction *
+    Next () const {
+        return _next;
+    }
 };
 
 }

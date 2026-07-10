@@ -45,6 +45,16 @@ public:
             _funcsEnd        = func;
         }
     }
+
+    Function *
+    FuncsStart () const {
+        return _funcsStart;
+    }
+
+    Function *
+    FuncsEnd () const {
+        return _funcsEnd;
+    }
 };
 
 }

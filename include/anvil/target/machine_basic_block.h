@@ -39,6 +39,16 @@ public:
         return _end;
     }
 
+    MachineBasicBlock *
+    Prev () const {
+        return _prev;
+    }
+
+    MachineBasicBlock *
+    Next () const {
+        return _next;
+    }
+
     void
     Emit (MachineInst *inst) {
         inst->_parent = this;
