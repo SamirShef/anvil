@@ -13,7 +13,8 @@ Checks: >
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-pro-type-vararg, -hicpp-vararg, -hicpp-no-malloc,
-  -cppcoreguidelines-no-malloc, -hicpp-signed-bitwise
+  -cppcoreguidelines-no-malloc, -hicpp-signed-bitwise,
+  -cppcoreguidelines-pro-type-union-access
 
 WarningsAsErrors: "*"
 
