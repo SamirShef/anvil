@@ -21,7 +21,9 @@ public:
     RawNullStream &
     operator= (RawNullStream &&) = default;
 
-    ~RawNullStream () override { FlushBuffer (); }
+    ~RawNullStream () override {
+        FlushBuffer ();
+    }
 };
 
 }

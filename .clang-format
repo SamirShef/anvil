@@ -5,7 +5,7 @@ TabWidth: 4
 UseTab: Never
 ColumnLimit: 90
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 NamespaceIndentation: None
