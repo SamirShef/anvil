@@ -7,8 +7,11 @@ namespace anvil {
 class Context;
 
 class Type {
+public:
+    enum Kind : uint8_t { Integer, Function };
+
 protected:
-    enum Kind : uint8_t { Integer, Function } _kind;
+    Kind _kind;
 
     explicit Type (Kind kind) : _kind (kind) {}
 
