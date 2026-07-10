@@ -11,6 +11,8 @@
 
 namespace anvil {
 
+class Module;
+
 class FunctionType : public Type {
     Type                  *_retType;
     SmallVector<Type *, 4> _args;
@@ -66,19 +68,14 @@ public:
 };
 
 class Function : public Value {
+    friend class Module;
     SmallVector<Argument *, 4> _args;
     BasicBlock                *_start{};
     BasicBlock                *_end{};
+    Function                  *_prev{};
+    Function                  *_next{};
 
-    Function (FunctionType *ty, std::string_view name, Context &ctx)
-        : Value (Value::Kind::Function, ty, name) {
-        auto &alloc = ctx.Allocator ();
-        for (size_t i = 0; i < ty->NumArgs (); ++i) {
-            auto *argMem = alloc.Alloc<Argument> ();
-            auto *arg    = ::new (argMem) Argument (ty->ParamType (i), this, i);
-            _args.PushBack (arg);
-        }
-    }
+    Function (FunctionType *ty, std::string_view name, Module *mod);
 
 public:
     RawOstream &
@@ -107,10 +104,7 @@ public:
     }
 
     static Function *
-    Create (Context &ctx, FunctionType *ty, std::string_view name) {
-        auto *mem = ctx.Allocator ().Alloc<Function> ();
-        return ::new (mem) Function (ty, name, ctx);
-    }
+    Create (Module *mod, FunctionType *ty, std::string_view name);
 
     FunctionType *
     FunctionTy () const {
