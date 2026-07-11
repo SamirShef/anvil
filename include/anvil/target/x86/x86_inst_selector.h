@@ -7,6 +7,7 @@
 #include "anvil/target/machine_module.h"
 #include "anvil/target/register.h"
 #include "anvil/target/x86/x86_inst_info.h"
+#include "anvil/target/x86/x86_register_info.h"
 
 namespace anvil::x86 {
 
@@ -90,8 +91,15 @@ private:
             break;
         }
         case Inst::OpCode::Ret: {
-            auto *retMI = _mctx.Allocator ().Alloc<MachineInst> ();
+            uint32_t valVReg = getOrCreateVReg (inst.Operand (0));
+            auto    *retMI   = _mctx.Allocator ().Alloc<MachineInst> ();
             ::new (retMI) MachineInst (x86::RET);
+            auto *movMI = _mctx.Allocator ().Alloc<MachineInst> ();
+            ::new (movMI) MachineInst (x86::MOV64rr);
+            movMI->AddOperand (MachineOperand::CreateReg (Register (RAX), true));
+            movMI->AddOperand (MachineOperand::CreateReg (Register (valVReg), false));
+            _currentMBB->Emit (movMI);
+            retMI->AddOperand (MachineOperand::CreateReg (Register (RAX)));
             _currentMBB->Emit (retMI);
             break;
         }

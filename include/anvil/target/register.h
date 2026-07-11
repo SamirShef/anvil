@@ -40,6 +40,11 @@ public:
     operator!= (Register &other) const {
         return _id != other._id;
     }
+
+    bool
+    operator== (const Register &other) const {
+        return _id == other._id;
+    }
 };
 
 }

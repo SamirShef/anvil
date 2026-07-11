@@ -5,6 +5,7 @@
 #include "anvil/target/machine_module.h"
 #include "anvil/target/machine_operand.h"
 #include "anvil/target/x86/x86_inst_info.h"
+#include "anvil/target/x86/x86_register_info.h"
 
 namespace anvil::x86 {
 
@@ -42,6 +43,9 @@ private:
         switch ((x86::OpCode) inst->Opcode ()) {
         case x86::OpCode::MOV64ri:
         case x86::OpCode::MOV64rr: {
+            if (inst->Operand (0).AsReg () == inst->Operand (1).AsReg ()) {
+                return;
+            }
             _os << "    movq    ";
             printOperand (inst->Operand (1)); // src
             _os << ", ";
@@ -104,7 +108,27 @@ private:
 
     static const char *
     physicalRegName (uint32_t id) {
-        return "%physreg";
+        switch ((x86::RegInfo) id) {
+        case RAX:
+            return "rax";
+        case RCX:
+            return "rcx";
+        case RDX:
+            return "rdx";
+        case RSI:
+            return "rsi";
+        case RDI:
+            return "rdi";
+        case R8:
+            return "r8";
+        case R9:
+            return "r9";
+        case R10:
+            return "r10";
+        case R11:
+            return "r11";
+        }
+        return "nophysreg";
     }
 };
 
