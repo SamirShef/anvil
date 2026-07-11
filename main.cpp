@@ -11,6 +11,7 @@
 #include "anvil/target/x86/target_machine.h"
 #include "anvil/target/x86/x86_asm_printer.h"
 #include "anvil/target/x86/x86_liveness_analysis.h"
+#include "anvil/target/x86/x86_pe_inserter.h"
 #include "anvil/target/x86/x86_reg_allocator.h"
 #include "anvil/target/x86/x86_register_coalescer.h"
 #include <memory>
@@ -47,6 +48,10 @@ main () {
 
     anvil::x86::X86RegisterAllocator regAllocator;
     regAllocator.AllocModule (mmod);
+
+    anvil::x86::X86PEInserter peInserter;
+    peInserter.InsertPrologEpilog (mmod, mctx);
+
     asmPrinter.EmitModule (mmod);
 
     delete tm;
@@ -61,11 +66,13 @@ ExampleMod (anvil::Context &ctx, anvil::IRBuilder &builder) {
     auto *c1    = builder.GetIntVal (i32Ty, 2);
     auto *c2    = builder.GetIntVal (i32Ty, 3);
 
-    auto *sumFuncTy    = anvil::FunctionType::Create (ctx, i32Ty, {});
-    auto *sumFunc      = anvil::Function::Create (mod.get (), sumFuncTy, "sum");
+    auto *sumFuncTy = anvil::FunctionType::Create (ctx, i32Ty, { i32Ty, i32Ty });
+    auto *sumFunc   = anvil::Function::Create (mod.get (), sumFuncTy, "sum");
+    sumFunc->Arg (0)->SetName ("a");
+    sumFunc->Arg (1)->SetName ("b");
     auto *sumFuncEntry = builder.CreateBasicBlock (sumFunc, "entry");
     builder.SetInsertPoint (sumFuncEntry);
-    auto *sum = builder.CreateAdd (c1, c2, "add_tmp");
+    auto *sum = builder.CreateAdd (sumFunc->Arg (0), sumFunc->Arg (1), "add_tmp");
     builder.CreateRet (sum);
     return std::move (mod);
 }

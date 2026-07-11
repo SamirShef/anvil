@@ -26,7 +26,7 @@ X86RegisterCoalescer::coalesceInst (MachineInst *inst) {
 
         inst->Operand (1) = MachineOperand::CreateReg (
             dst.AsReg (),
-            false, // use
+            false, // isDef
             src.IsKill ());
 
         addRegIfNeed (dst.AsReg (), &inst->Operand (0));
@@ -42,9 +42,20 @@ X86RegisterCoalescer::coalesceInst (MachineInst *inst) {
         break;
     }
     case MOV64ri:
+    case MOV64rm:
+    case SUB64ri:
+    case PUSH64r:
+    case POP64r:
     case RET: {
         auto &op = inst->Operand (0);
         addRegIfNeed (op.AsReg (), &op);
+        break;
+    }
+    case MOV64mr: {
+        auto &op = inst->Operand (1);
+        if (op.IsReg ()) {
+            addRegIfNeed (op.AsReg (), &op);
+        }
         break;
     }
     }

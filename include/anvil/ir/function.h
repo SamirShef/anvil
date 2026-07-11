@@ -117,7 +117,7 @@ public:
     }
 
     Argument *
-    Arg (size_t index) {
+    Arg (size_t index) const {
         return _args[index];
     }
 

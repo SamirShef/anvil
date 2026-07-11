@@ -26,11 +26,20 @@ X86AsmPrinter::emitFunction (MachineFunction *func) {
 void
 X86AsmPrinter::emitInst (MachineInst *inst) {
     switch ((x86::OpCode) inst->Opcode ()) {
-    case x86::OpCode::MOV64ri:
-    case x86::OpCode::MOV64rr: {
+    case MOV64rr: {
         if (inst->Operand (0).AsReg () == inst->Operand (1).AsReg ()) {
             return;
         }
+        _os << "    movq     ";
+        printOperand (inst->Operand (1)); // src
+        _os << ", ";
+        printOperand (inst->Operand (0)); // dst
+        _os << '\n';
+        break;
+    }
+    case MOV64ri:
+    case MOV64rm:
+    case MOV64mr: {
         _os << "    movq     ";
         printOperand (inst->Operand (1)); // src
         _os << ", ";
@@ -46,6 +55,7 @@ X86AsmPrinter::emitInst (MachineInst *inst) {
         _os << '\n';
         break;
     }
+    case SUB64ri:
     case SUB64rr: {
         _os << "    subq     ";
         printOperand (inst->Operand (1)); // src
@@ -56,6 +66,18 @@ X86AsmPrinter::emitInst (MachineInst *inst) {
     }
     case RET: {
         _os << "    ret\n";
+        break;
+    }
+    case PUSH64r: {
+        _os << "    pushq    ";
+        printOperand (inst->Operand (0)); // src
+        _os << '\n';
+        break;
+    }
+    case POP64r: {
+        _os << "    popq     ";
+        printOperand (inst->Operand (0)); // src
+        _os << '\n';
         break;
     }
     }
@@ -72,6 +94,9 @@ X86AsmPrinter::printOperand (MachineOperand operand) {
             _os << "%" << physicalRegName (reg.Id ());
         } else if (reg.IsVirtual ()) {
             _os << "%vreg" << reg.Id () - 1024;
+        } else if (operand.IsFI ()) {
+            int32_t offset = -static_cast<int32_t> ((operand.AsFI () + 1) * 8);
+            _os << offset << "(%rbp)";
         }
         break;
     }
@@ -112,6 +137,10 @@ X86AsmPrinter::physicalRegName (uint32_t id) {
         return "r10";
     case R11:
         return "r11";
+    case RBP:
+        return "rbp";
+    case RSP:
+        return "rsp";
     }
     return "nophysreg";
 }

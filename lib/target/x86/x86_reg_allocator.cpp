@@ -6,6 +6,7 @@ namespace anvil::x86 {
 void
 X86RegisterAllocator::allocInst (MachineInst *inst) {
     switch ((x86::OpCode) inst->Opcode ()) {
+    case MOV64rm:
     case MOV64ri: {
         allocReg (inst->Operand (0));
         break;
@@ -19,6 +20,16 @@ X86RegisterAllocator::allocInst (MachineInst *inst) {
     }
     case RET: {
         allocReg (inst->Operand (0)); // rax
+        break;
+    }
+    case MOV64mr: {
+        allocReg (inst->Operand (1));
+        break;
+    }
+    case SUB64ri:
+    case PUSH64r:
+    case POP64r: {
+        allocReg (inst->Operand (0));
         break;
     }
     }

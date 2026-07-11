@@ -6,8 +6,13 @@ namespace anvil::x86 {
 void
 X86LivenessAnalysis::analyzeInst (MachineInst *inst) {
     switch ((x86::OpCode) inst->Opcode ()) {
+    case MOV64rm:
     case MOV64ri: {
         defReg (inst->Operand (0));
+        break;
+    }
+    case MOV64mr: {
+        useReg (inst->Operand (1));
         break;
     }
     case MOV64rr: {
@@ -24,6 +29,19 @@ X86LivenessAnalysis::analyzeInst (MachineInst *inst) {
     }
     case RET: {
         useReg (inst->Operand (0));
+        break;
+    }
+    case SUB64ri: {
+        defReg (inst->Operand (0));
+        useReg (inst->Operand (0));
+        break;
+    }
+    case PUSH64r: {
+        useReg (inst->Operand (0));
+        break;
+    }
+    case POP64r: {
+        defReg (inst->Operand (0));
         break;
     }
     }
