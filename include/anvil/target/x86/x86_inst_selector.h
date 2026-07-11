@@ -1,13 +1,7 @@
 #pragma once
-#include "anvil/collections/hash_map.h"
 #include "anvil/core/module.h"
-#include "anvil/ir/inst.h"
 #include "anvil/target/inst_selector.h"
-#include "anvil/target/machine_context.h"
 #include "anvil/target/machine_module.h"
-#include "anvil/target/register.h"
-#include "anvil/target/x86/x86_inst_info.h"
-#include "anvil/target/x86/x86_register_info.h"
 
 namespace anvil::x86 {
 
@@ -20,93 +14,32 @@ public:
     explicit X86InstructionSelector (MachineContext &mctx) : _mctx (mctx) {}
 
     void
-    SelectInstructions (Module &inMod, MachineModule &outMod) override {
-        for (auto *srcFunc = inMod.FuncsStart (); srcFunc != nullptr;
-             srcFunc       = srcFunc->Next ()) {
-            if (srcFunc->IsDeclaration ()) {
-                continue;
-            }
-
-            auto *mf = _mctx.Allocator ().Alloc<MachineFunction> ();
-            ::new (mf) MachineFunction (srcFunc->GetName ());
-
-            selectFunction (*srcFunc, *mf);
-
-            outMod.AddFunction (mf);
-        }
-    }
+    SelectInstructions (Module &inMod, MachineModule &outMod) override;
 
 private:
     uint32_t
-    getOrCreateVReg (Value *v) {
-        if (_vregMap.Find (v) == nullptr) {
-            auto vreg = CreateVReg ();
-            _vregMap.Insert (v, vreg);
-            if (auto *c = DynCast<ConstantInt> (v)) {
-                auto *movImmMI = _mctx.Allocator ().Alloc<MachineInst> ();
-                ::new (movImmMI) MachineInst (x86::MOV64ri);
-
-                movImmMI->AddOperand (MachineOperand::CreateReg (Register (vreg), true));
-                movImmMI->AddOperand (
-                    MachineOperand::CreateImm (static_cast<int64_t> (c->Val ())));
-
-                _currentMBB->Emit (movImmMI);
-            }
-        }
-        return *_vregMap.Find (v);
-    }
+    getOrCreateVReg (Value *v);
 
     void
-    selectFunction (const Function &srcFunc, MachineFunction &destFunc) {
-        for (auto *srcBB = srcFunc.Start (); srcBB != nullptr; srcBB = srcBB->Next ()) {
-            _currentMBB = destFunc.CreateBasicBlock (_mctx, srcBB->GetName ());
-            destFunc.AddBasicBlock (_currentMBB);
-
-            for (auto *srcInst = srcBB->Start (); srcInst != nullptr;
-                 srcInst       = srcInst->Next ()) {
-                selectInstruction (*srcInst);
-            }
-        }
-    }
+    selectFunction (const Function &srcFunc, MachineFunction &destFunc);
 
     void
-    selectInstruction (Inst &inst) {
-        switch (inst.Opcode ()) {
-        case Inst::OpCode::Add: {
-            uint32_t dstVReg = getOrCreateVReg (&inst);
-            uint32_t lhsVReg = getOrCreateVReg (inst.Operand (0));
-            uint32_t rhsVReg = getOrCreateVReg (inst.Operand (1));
+    selectInstruction (Inst &inst);
 
-            auto *movMI = _mctx.Allocator ().Alloc<MachineInst> ();
-            ::new (movMI) MachineInst (x86::MOV64rr);
-            movMI->AddOperand (MachineOperand::CreateReg (Register (dstVReg), true));
-            movMI->AddOperand (MachineOperand::CreateReg (Register (lhsVReg), false));
-            _currentMBB->Emit (movMI);
+    MachineInst *
+    emitMov (Register dst, Register src);
 
-            auto *addMI = _mctx.Allocator ().Alloc<MachineInst> ();
-            ::new (addMI) MachineInst (x86::ADD64rr);
-            addMI->AddOperand (MachineOperand::CreateReg (Register (dstVReg), true));
-            addMI->AddOperand (MachineOperand::CreateReg (Register (rhsVReg), false));
-            _currentMBB->Emit (addMI);
-            break;
-        }
-        case Inst::OpCode::Ret: {
-            uint32_t valVReg = getOrCreateVReg (inst.Operand (0));
-            auto    *retMI   = _mctx.Allocator ().Alloc<MachineInst> ();
-            ::new (retMI) MachineInst (x86::RET);
-            auto *movMI = _mctx.Allocator ().Alloc<MachineInst> ();
-            ::new (movMI) MachineInst (x86::MOV64rr);
-            movMI->AddOperand (MachineOperand::CreateReg (Register (RAX), true));
-            movMI->AddOperand (MachineOperand::CreateReg (Register (valVReg), false));
-            _currentMBB->Emit (movMI);
-            retMI->AddOperand (MachineOperand::CreateReg (Register (RAX)));
-            _currentMBB->Emit (retMI);
-            break;
-        }
-        default:
-            break;
-        }
-    }
+    MachineInst *
+    emitMov (Register dst, int64_t imm);
+
+    MachineInst *
+    emitAdd (Register dst, Register src);
+
+    MachineInst *
+    emitSub (Register dst, Register src);
+
+    MachineInst *
+    emitRet (Register valReg);
 };
 
 }
