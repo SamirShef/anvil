@@ -4,7 +4,7 @@
 namespace anvil::x86 {
 
 void
-X86LivenessAnalysis::analyzeInst (MachineInst *inst) {
+X86LivenessAnalysis::analyseInst (MachineInst *inst) {
     switch ((x86::OpCode) inst->Opcode ()) {
     case MOV64rm:
     case MOV64ri: {

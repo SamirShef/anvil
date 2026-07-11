@@ -102,6 +102,8 @@ public:
             _data       = other._data;
             other._data = (T *) other._inlineBuf;
         }
+        other._len = 0;
+        other._cap = N;
     }
 
     ~SmallVector () {

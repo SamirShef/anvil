@@ -9,7 +9,7 @@ namespace anvil::x86 {
 
 class X86RegisterAllocator : public RegisterAllocator {
 public:
-    X86RegisterAllocator () {
+    explicit X86RegisterAllocator (MachineContext &mctx) : RegisterAllocator (mctx) {
         _availableRegs = { RAX, RCX, RDX, RSI, RDI, R8, R9, R10, R11 };
     }
 
@@ -23,6 +23,9 @@ public:
 private:
     void
     allocFunction (MachineFunction *func) {
+        _curFunc = func;
+        _vregId2Physreg.Clear ();
+        _vregId2StackSlot.Clear ();
         for (auto *mbb = func->BlockStart (); mbb != nullptr; mbb = mbb->Next ()) {
             for (auto *inst = mbb->Start (); inst != nullptr; inst = inst->Next ()) {
                 allocInst (inst);
@@ -34,7 +37,7 @@ private:
     allocInst (MachineInst *inst);
 
     void
-    allocReg (MachineOperand &op);
+    allocReg (MachineOperand &op, MachineInst *inst);
 };
 
 }

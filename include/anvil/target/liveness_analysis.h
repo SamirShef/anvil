@@ -9,7 +9,7 @@ class MachineOperand;
 
 class LivenessAnalysis {
 protected:
-    SmallVector<MachineOperand, 8> _liveRegs;
+    SmallVector<Register, 8> _liveRegs;
 
 public:
     LivenessAnalysis ()                         = default;

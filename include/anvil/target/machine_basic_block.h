@@ -81,6 +81,15 @@ public:
             point->_prev = inst;
         }
     }
+
+    void
+    InsertAfter (MachineInst *inst, MachineInst *point) {
+        if (point == nullptr) {
+            Emit (inst);
+        } else {
+            InsertBefore (inst, point->Next ());
+        }
+    }
 };
 
 }

@@ -18,23 +18,24 @@ private:
     analyseFunction (MachineFunction *func) {
         for (auto *mbb = func->BlockEnd (); mbb != nullptr; mbb = mbb->Prev ()) {
             for (auto *inst = mbb->End (); inst != nullptr; inst = inst->Prev ()) {
-                analyzeInst (inst);
+                analyseInst (inst);
             }
         }
     }
 
     void
-    analyzeInst (MachineInst *inst);
+    analyseInst (MachineInst *inst);
 
     void
     useReg (MachineOperand &op) {
         if (!op.IsReg ()) {
             return;
         }
-        if (_liveRegs.Contains (op)) {
+        auto reg = op.AsReg ();
+        if (_liveRegs.Contains (reg)) {
             return;
         }
-        _liveRegs.PushBack (op);
+        _liveRegs.PushBack (reg);
         op.SetKill (true);
     }
 
@@ -43,7 +44,7 @@ private:
         if (!op.IsReg ()) {
             return;
         }
-        _liveRegs.Remove (op);
+        _liveRegs.Remove (op.AsReg ());
     }
 };
 

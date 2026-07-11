@@ -110,7 +110,8 @@ X86AsmPrinter::printOperand (MachineOperand operand) {
         break;
     }
     case MachineOperand::FrameIndexOp: {
-        _os << "[stack_slot_" << operand.AsFI () << ']';
+        int32_t offset = -static_cast<int32_t> ((operand.AsFI () + 1) * 8);
+        _os << offset << "(%rbp)";
         break;
     }
     }
