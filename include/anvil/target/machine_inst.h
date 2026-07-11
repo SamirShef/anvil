@@ -53,9 +53,19 @@ public:
         return _prev;
     }
 
+    void
+    SetPrev (MachineInst *prev) {
+        _prev = prev;
+    }
+
     MachineInst *
     Next () const {
         return _next;
+    }
+
+    void
+    SetNext (MachineInst *next) {
+        _next = next;
     }
 };
 

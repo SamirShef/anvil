@@ -34,6 +34,11 @@ public:
         return _start;
     }
 
+    void
+    SetStart (MachineInst *start) {
+        _start = start;
+    }
+
     MachineInst *
     End () const {
         return _end;

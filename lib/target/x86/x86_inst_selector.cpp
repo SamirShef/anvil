@@ -1,4 +1,5 @@
 #include "anvil/target/x86/x86_inst_selector.h"
+#include "anvil/target/register.h"
 #include "anvil/target/x86/x86_inst_info.h"
 #include "anvil/target/x86/x86_register_info.h"
 
@@ -36,9 +37,31 @@ X86InstructionSelector::getOrCreateVReg (Value *v) {
 void
 X86InstructionSelector::selectFunction (
     const Function &srcFunc, MachineFunction &destFunc) {
+    _currentMBB = destFunc.CreateBasicBlock (_mctx, srcFunc.Start ()->GetName ());
+    destFunc.AddBasicBlock (_currentMBB);
+    static const RegInfo ABI_ARG_REGS[] = { RDI, RSI, RDX, RCX, R8, R9 };
+
+    for (size_t argIdx = 0; argIdx < srcFunc.ArgCount (); ++argIdx) {
+        auto *arg = srcFunc.Arg (argIdx);
+        if (arg->FirstUse () == nullptr) {
+            continue;
+        }
+        uint32_t argVReg = CreateVReg ();
+        _vregMap.Insert (arg, argVReg);
+
+        if (argIdx < 6) {
+            // movq %physreg, %vreg
+            emitMov (Register (argVReg), Register (ABI_ARG_REGS[argIdx]));
+        } else {
+            // TODO: implement
+        }
+    }
+
     for (auto *srcBB = srcFunc.Start (); srcBB != nullptr; srcBB = srcBB->Next ()) {
-        _currentMBB = destFunc.CreateBasicBlock (_mctx, srcBB->GetName ());
-        destFunc.AddBasicBlock (_currentMBB);
+        if (srcBB != srcFunc.Start ()) {
+            _currentMBB = destFunc.CreateBasicBlock (_mctx, srcBB->GetName ());
+            destFunc.AddBasicBlock (_currentMBB);
+        }
 
         for (auto *srcInst = srcBB->Start (); srcInst != nullptr;
              srcInst       = srcInst->Next ()) {
@@ -90,7 +113,7 @@ X86InstructionSelector::emitMov (Register dst, Register src) {
 MachineInst *
 X86InstructionSelector::emitMov (Register dst, int64_t imm) {
     auto *movMI = _mctx.Allocator ().Alloc<MachineInst> ();
-    ::new (movMI) MachineInst (x86::MOV64rr);
+    ::new (movMI) MachineInst (x86::MOV64ri);
     movMI->AddOperand (MachineOperand::CreateReg (dst, true));
     movMI->AddOperand (MachineOperand::CreateImm (imm));
     _currentMBB->Emit (movMI);

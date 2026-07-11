@@ -28,6 +28,9 @@ private:
 
     void
     useReg (MachineOperand &op) {
+        if (!op.IsReg ()) {
+            return;
+        }
         if (_liveRegs.Contains (op)) {
             return;
         }
@@ -37,6 +40,9 @@ private:
 
     void
     defReg (MachineOperand &op) {
+        if (!op.IsReg ()) {
+            return;
+        }
         _liveRegs.Remove (op);
     }
 };
