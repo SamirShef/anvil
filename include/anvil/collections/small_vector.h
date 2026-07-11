@@ -32,9 +32,46 @@ class SmallVector {
     }
 
 public:
-    SmallVector (const SmallVector &) = delete;
+    SmallVector (const SmallVector &other) {
+        if (other._len <= N) {
+            _data = (T *) (_inlineBuf);
+            _cap  = N;
+        } else {
+            _data = static_cast<T *> (std::malloc (other._len * sizeof (T)));
+            _cap  = other._len;
+        }
+
+        for (size_t i = 0; i < other._len; ++i) {
+            ::new (&_data[_len++]) T (other._data[i]);
+        }
+    }
+
     SmallVector &
-    operator= (const SmallVector &) = delete;
+    operator= (const SmallVector &other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        for (size_t i = 0; i < _len; ++i) {
+            _data[i].~T ();
+        }
+        _len = 0;
+
+        if (_cap < other._len) {
+            if (_cap != N) {
+                std::free (_data);
+            }
+            _data = static_cast<T *> (std::malloc (other._len * sizeof (T)));
+            _cap  = other._len;
+        }
+
+        for (size_t i = 0; i < other._len; ++i) {
+            ::new (&_data[_len++]) T (other._data[i]);
+        }
+
+        return *this;
+    }
+
     SmallVector &
     operator= (SmallVector &&) = default;
 
@@ -122,6 +159,32 @@ public:
     size_t
     Capacity () const {
         return _cap;
+    }
+
+    bool
+    Contains (const T &el) const {
+        for (size_t i = 0; i < _len; ++i) {
+            if (_data[i] == el) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void
+    Remove (const T &el) {
+        size_t i = 0;
+        for (; i < _len; ++i) {
+            if (_data[i] == el) {
+                if constexpr (!std::is_trivially_destructible_v<T>) {
+                    _data[i].~T ();
+                }
+                break;
+            }
+        }
+        for (; i < _len - 1; ++i) {
+            _data[i] = std::move (_data[i + 1]);
+        }
     }
 };
 

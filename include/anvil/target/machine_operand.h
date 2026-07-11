@@ -14,15 +14,32 @@ private:
     bool _isDef{};
     bool _isKill{};
 
-    union {
+    union Data {
         Register           Reg;
         int64_t            Imm;
         MachineBasicBlock *MBB;
         int                FI;
+
+        bool
+        operator== (const Data &other) const {
+            return Reg == other.Reg && Imm == other.Imm && MBB == other.MBB
+                   && FI == other.FI;
+        }
+
+        bool
+        operator!= (const Data &other) const {
+            return !(*this == other);
+        }
     } _storage{};
 
 public:
     explicit MachineOperand (Kind kind) : _kind (kind) {}
+
+    bool
+    operator== (const MachineOperand &other) const = default;
+
+    bool
+    operator!= (const MachineOperand &other) const = default;
 
     static MachineOperand
     CreateReg (Register reg, bool isDef = false, bool isKill = false) {
