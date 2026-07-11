@@ -36,6 +36,8 @@ private:
                 emitInst (mi);
             }
         }
+        _os << "    .size    " << name << ", .-" << name << '\n';
+        _os << "    .section .note.GNU-stack,\"\",@progbits\n";
     }
 
     void
@@ -46,7 +48,7 @@ private:
             if (inst->Operand (0).AsReg () == inst->Operand (1).AsReg ()) {
                 return;
             }
-            _os << "    movq    ";
+            _os << "    movq     ";
             printOperand (inst->Operand (1)); // src
             _os << ", ";
             printOperand (inst->Operand (0)); // dst
@@ -54,7 +56,7 @@ private:
             break;
         }
         case ADD64rr: {
-            _os << "    addq    ";
+            _os << "    addq     ";
             printOperand (inst->Operand (1)); // src
             _os << ", ";
             printOperand (inst->Operand (0)); // dst
@@ -62,7 +64,7 @@ private:
             break;
         }
         case SUB64rr: {
-            _os << "    subq    ";
+            _os << "    subq     ";
             printOperand (inst->Operand (1)); // src
             _os << ", ";
             printOperand (inst->Operand (0)); // dst
