@@ -73,13 +73,39 @@ public:
     }
 
     SmallVector &
-    operator= (SmallVector &&) = default;
+    operator= (SmallVector &&other) noexcept {
+        if (this != &other) {
+            Clear ();
 
-    SmallVector () : _data ((T *) (_inlineBuf)) {}
+            if (_cap != N) {
+                std::free (_data);
+            }
+
+            _len = other._len;
+            _cap = other._cap;
+
+            if (other._cap == N) {
+                _data = reinterpret_cast<T *> (_inlineBuf);
+                for (size_t i = 0; i < _len; ++i) {
+                    ::new (&_data[i]) T (std::move (other._data[i]));
+                    other._data[i].~T ();
+                }
+            } else {
+                _data       = other._data;
+                other._data = reinterpret_cast<T *> (other._inlineBuf);
+            }
+
+            other._len = 0;
+            other._cap = N;
+        }
+        return *this;
+    }
+
+    SmallVector () : _data (reinterpret_cast<T *> (_inlineBuf)) {}
 
     SmallVector (std::initializer_list<T> init) {
         if (init.size () <= N) {
-            _data = (T *) (_inlineBuf);
+            _data = reinterpret_cast<T *> (_inlineBuf);
             _cap  = N;
         } else {
             _data = static_cast<T *> (std::malloc (init.size () * sizeof (T)));
@@ -93,14 +119,14 @@ public:
 
     SmallVector (SmallVector &&other) noexcept : _len (other._len), _cap (other._cap) {
         if (other._cap == N) {
-            _data = (T *) _inlineBuf;
+            _data = reinterpret_cast<T *> (_inlineBuf);
             for (size_t i = 0; i < _len; ++i) {
                 ::new (&_data[i]) T (std::move (other._data[i]));
                 other._data[i].~T ();
             }
         } else {
             _data       = other._data;
-            other._data = (T *) other._inlineBuf;
+            other._data = reinterpret_cast<T *> (other._inlineBuf);
         }
         other._len = 0;
         other._cap = N;
@@ -129,8 +155,9 @@ public:
         if (_cap != N) {
             std::free (_data);
         }
-        _len = 0;
-        _cap = N;
+        _len  = 0;
+        _cap  = N;
+        _data = reinterpret_cast<T *> (_inlineBuf);
     }
 
     void
