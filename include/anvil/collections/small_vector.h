@@ -196,14 +196,18 @@ public:
         size_t i = 0;
         for (; i < _len; ++i) {
             if (_data[i] == el) {
-                if constexpr (!std::is_trivially_destructible_v<T>) {
-                    _data[i].~T ();
-                }
                 break;
             }
         }
+        if (i == _len) {
+            return;
+        }
         for (; i < _len - 1; ++i) {
             _data[i] = std::move (_data[i + 1]);
+        }
+        --_len;
+        if constexpr (!std::is_trivially_destructible_v<T>) {
+            _data[_len].~T ();
         }
     }
 };

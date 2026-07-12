@@ -31,6 +31,11 @@ public:
     GetInterval (Register reg) const {
         return _intervals.Find (reg);
     }
+
+    HashMap<Register, LiveInterval> &
+    Intervals () {
+        return _intervals;
+    }
 };
 
 }

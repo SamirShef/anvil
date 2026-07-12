@@ -13,14 +13,14 @@ X86LivenessAnalysis::analyseInst (MachineInst *inst) {
     for (size_t i = 0; i < inst->NumOperands (); ++i) {
         auto &op = inst->Operand (i);
         if (op.IsReg () && op.IsDef ()) {
-            defReg (op, idx + 2);
+            defReg (op, idx);
         }
     }
 
     for (size_t i = 0; i < inst->NumOperands (); ++i) {
         auto &op = inst->Operand (i);
         if (op.IsReg () && op.IsUse ()) {
-            useReg (op, idx + 1);
+            useReg (op, idx);
         }
     }
 }

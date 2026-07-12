@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iterator>
 #include <utility>
 
 namespace anvil {
@@ -174,6 +175,155 @@ class HashMap {
     }
 
 public:
+    // NOLINTBEGIN(readability-identifier-naming)
+    struct KeyValue {
+        const K &first;
+        V       &second;
+    };
+
+    struct ConstKeyValue {
+        const K &first;
+        const V &second;
+    };
+
+    class Iterator {
+        Bucket *_current;
+        Bucket *_end;
+
+        void
+        advance () noexcept {
+            while (_current < _end && _current->State != BucketState::Occupied) {
+                ++_current;
+            }
+        }
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = KeyValue;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = void;
+        using reference         = KeyValue;
+
+        Iterator (Bucket *start, Bucket *end) noexcept : _current (start), _end (end) {
+            advance ();
+        }
+
+        KeyValue
+        operator* () const noexcept {
+            return { *(const K *) (_current->KeyBytes), *(V *) (_current->ValueBytes) };
+        }
+
+        Iterator &
+        operator++ () noexcept {
+            ++_current;
+            advance ();
+            return *this;
+        }
+
+        Iterator
+        operator++ (int) noexcept {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        bool
+        operator== (const Iterator &other) const noexcept {
+            return _current == other._current;
+        }
+
+        bool
+        operator!= (const Iterator &other) const noexcept {
+            return _current != other._current;
+        }
+    };
+
+    class ConstIterator {
+        const Bucket *_current;
+        const Bucket *_end;
+
+        void
+        advance () noexcept {
+            while (_current < _end && _current->State != BucketState::Occupied) {
+                ++_current;
+            }
+        }
+
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = ConstKeyValue;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = void;
+        using reference         = ConstKeyValue;
+
+        ConstIterator (const Bucket *start, const Bucket *end) noexcept
+            : _current (start), _end (end) {
+            advance ();
+        }
+
+        ConstKeyValue
+        operator* () const noexcept {
+            return { *(const K *) (_current->KeyBytes),
+                     *(const V *) (_current->ValueBytes) };
+        }
+
+        ConstIterator &
+        operator++ () noexcept {
+            ++_current;
+            advance ();
+            return *this;
+        }
+
+        ConstIterator
+        operator++ (int) noexcept {
+            ConstIterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        bool
+        operator== (const ConstIterator &other) const noexcept {
+            return _current == other._current;
+        }
+
+        bool
+        operator!= (const ConstIterator &other) const noexcept {
+            return _current != other._current;
+        }
+    };
+
+    Iterator
+    begin () noexcept {
+        return Iterator (_buckets, _buckets + _capacity);
+    }
+
+    Iterator
+    end () noexcept {
+        return Iterator (_buckets + _capacity, _buckets + _capacity);
+    }
+
+    ConstIterator
+    begin () const noexcept {
+        return ConstIterator (_buckets, _buckets + _capacity);
+    }
+
+    ConstIterator
+    end () const noexcept {
+        return ConstIterator (_buckets + _capacity, _buckets + _capacity);
+    }
+
+    ConstIterator
+    cbegin () const noexcept {
+        return ConstIterator (_buckets, _buckets + _capacity);
+    }
+
+    ConstIterator
+    cend () const noexcept {
+        return ConstIterator (_buckets + _capacity, _buckets + _capacity);
+    }
+
+    // NOLINTEND(readability-identifier-naming)
+
     HashMap () noexcept = default;
 
     explicit HashMap (size_t initialCapacity) : _capacity (1) {
