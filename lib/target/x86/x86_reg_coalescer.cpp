@@ -7,21 +7,38 @@ void
 X86RegisterCoalescer::coalesceInst (MachineInst *inst) {
     switch ((x86::OpCode) inst->Opcode ()) {
     case MOV64rr: {
-        auto  dst       = inst->Operand (0);
-        auto  src       = inst->Operand (1);
-        auto *foundUses = _map.Find (src.AsReg ());
-        if (!src.IsKill () || foundUses == nullptr) {
+        auto  dst         = inst->Operand (0);
+        auto  src         = inst->Operand (1);
+        auto *foundUses   = _map.Find (src.AsReg ());
+        bool  canCoalesce = false;
+
+        const auto *intDst = _liveness.GetInterval (dst.AsReg ());
+        const auto *intSrc = _liveness.GetInterval (src.AsReg ());
+
+        if (intDst != nullptr && intSrc != nullptr && !intDst->InterferesWith (*intSrc)) {
+
+            if (src.AsReg ().IsVirtual ()) {
+                canCoalesce = true;
+            }
+        }
+
+        if (!canCoalesce) {
             addRegIfNeed (dst.AsReg (), &inst->Operand (0));
             addRegIfNeed (src.AsReg (), &inst->Operand (1));
             return;
         }
-        auto uses = *foundUses;
-        _map.Remove (src.AsReg ());
-        for (size_t i = 0; i < uses.Size (); ++i) {
-            auto &use = uses[i];
-            *use
-                = MachineOperand::CreateReg (dst.AsReg (), use->IsDef (), use->IsKill ());
-            addRegIfNeed (dst.AsReg (), use);
+
+        if (foundUses != nullptr) {
+            auto uses = *foundUses;
+            _map.Remove (src.AsReg ());
+            for (size_t i = 0; i < uses.Size (); ++i) {
+                auto &use = uses[i];
+                *use      = MachineOperand::CreateReg (
+                    dst.AsReg (),
+                    use->IsDef (),
+                    use->IsKill ());
+                addRegIfNeed (dst.AsReg (), use);
+            }
         }
 
         inst->Operand (1) = MachineOperand::CreateReg (

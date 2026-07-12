@@ -1,6 +1,8 @@
 #pragma once
+#include "anvil/collections/hash_map.h"
 #include "anvil/collections/small_vector.h"
-#include "anvil/target/machine_operand.h"
+#include "anvil/target/live_interval.h"
+#include "anvil/target/register.h"
 
 namespace anvil {
 
@@ -9,7 +11,8 @@ class MachineOperand;
 
 class LivenessAnalysis {
 protected:
-    SmallVector<Register, 8> _liveRegs;
+    SmallVector<Register, 8>        _liveRegs;
+    HashMap<Register, LiveInterval> _intervals;
 
 public:
     LivenessAnalysis ()                         = default;
@@ -23,6 +26,11 @@ public:
 
     virtual void
     AnalyseModule (MachineModule &mmod) = 0;
+
+    const LiveInterval *
+    GetInterval (Register reg) const {
+        return _intervals.Find (reg);
+    }
 };
 
 }

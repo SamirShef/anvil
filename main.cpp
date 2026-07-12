@@ -40,10 +40,10 @@ main () {
 
     tm->SelectInstructions (*mod, mmod);
 
-    anvil::x86::X86LivenessAnalysis livenessAnalysis;
-    livenessAnalysis.AnalyseModule (mmod);
+    anvil::x86::X86LivenessAnalysis liveness;
+    liveness.AnalyseModule (mmod);
 
-    anvil::x86::X86RegisterCoalescer coalescer;
+    anvil::x86::X86RegisterCoalescer coalescer (liveness);
     coalescer.CoalesceModule (mmod);
 
     anvil::x86::X86RegisterAllocator regAllocator (mctx);

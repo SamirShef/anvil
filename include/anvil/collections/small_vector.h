@@ -108,11 +108,29 @@ public:
 
     ~SmallVector () {
         for (size_t i = 0; i < _len; ++i) {
-            _data[i].~T ();
+            if constexpr (!std::is_trivially_destructible_v<T>) {
+                _data[i].~T ();
+            }
         }
         if (_cap != N) {
             std::free (_data);
         }
+        _len = 0;
+        _cap = N;
+    }
+
+    void
+    Clear () {
+        for (size_t i = 0; i < _len; ++i) {
+            if constexpr (!std::is_trivially_destructible_v<T>) {
+                _data[i].~T ();
+            }
+        }
+        if (_cap != N) {
+            std::free (_data);
+        }
+        _len = 0;
+        _cap = N;
     }
 
     void

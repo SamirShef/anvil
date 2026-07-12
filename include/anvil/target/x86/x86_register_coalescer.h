@@ -9,6 +9,9 @@ namespace anvil::x86 {
 
 class X86RegisterCoalescer : public RegisterCoalescer {
 public:
+    explicit X86RegisterCoalescer (LivenessAnalysis &liveness)
+        : RegisterCoalescer (liveness) {}
+
     void
     CoalesceModule (MachineModule &mmod) override {
         for (auto *func = mmod.FuncsStart (); func != nullptr; func = func->Next ()) {
