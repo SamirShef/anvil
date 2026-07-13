@@ -15,9 +15,9 @@ X86LivenessAnalysis::analyseFunction (MachineFunction *func) {
         }
     }
 
-    _liveRegs.Clear ();
-
+    // TODO: implement CFG building
     for (auto *mbb = func->BlockEnd (); mbb != nullptr; mbb = mbb->Prev ()) {
+        _liveRegs.Clear ();
         for (auto *inst = mbb->End (); inst != nullptr; inst = inst->Prev ()) {
             analyseInst (inst);
         }

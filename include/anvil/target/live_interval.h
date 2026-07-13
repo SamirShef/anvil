@@ -26,7 +26,7 @@ struct LiveInterval {
 
     bool
     InterferesWith (const LiveInterval &other) const {
-        return Start <= other.End && other.Start <= End;
+        return Start < other.End && other.Start < End;
     }
 };
 

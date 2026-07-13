@@ -51,8 +51,9 @@ public:
     }
 
     static MachineOperand
-    CreateImm (int64_t imm) {
+    CreateImm (int64_t imm, bool isDef = false) {
         MachineOperand op (Kind::ImmOp);
+        op._isDef       = isDef;
         op._storage.Imm = imm;
         return op;
     }
@@ -65,8 +66,9 @@ public:
     }
 
     static MachineOperand
-    CreateFI (int fi) {
+    CreateFI (int fi, bool isDef = false) {
         MachineOperand op (Kind::FrameIndexOp);
+        op._isDef      = isDef;
         op._storage.FI = fi;
         return op;
     }

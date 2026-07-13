@@ -49,11 +49,11 @@ main () {
     // CompileAndEmitToOStream (TestDiamond, diamondFile);
     CompileAndEmitToOStream (ExampleMod, anvil::Outs ());
     anvil::Outs () << '\n';
-    CompileAndEmitToOStream (TestMaxPressure, anvil::Outs ());
-    anvil::Outs () << '\n';
-    CompileAndEmitToOStream (TestPingPong, anvil::Outs ());
-    anvil::Outs () << '\n';
-    CompileAndEmitToOStream (TestDiamond, anvil::Outs ());
+    // CompileAndEmitToOStream (TestMaxPressure, anvil::Outs ());
+    // anvil::Outs () << '\n';
+    // CompileAndEmitToOStream (TestPingPong, anvil::Outs ());
+    // anvil::Outs () << '\n';
+    // CompileAndEmitToOStream (TestDiamond, anvil::Outs ());
     return 0;
 }
 
@@ -71,17 +71,26 @@ ExampleMod (anvil::Context &ctx, anvil::IRBuilder &builder) {
     sumFunc->Arg (1)->SetName ("b");
     auto *sumFuncEntry = builder.CreateBasicBlock (sumFunc, "entry");
     builder.SetInsertPoint (sumFuncEntry);
-    auto *sum      = builder.CreateAdd (sumFunc->Arg (0), sumFunc->Arg (1), "sum_tmp");
-    auto *add1     = builder.CreateAdd (c3, c1, "add1_tmp");
-    auto *add2     = builder.CreateAdd (add1, c1, "add2_tmp");
-    auto *add3     = builder.CreateAdd (add2, c1, "add3_tmp");
-    auto *add4     = builder.CreateAdd (add3, c1, "add4_tmp");
-    auto *add5     = builder.CreateAdd (add4, c1, "add5_tmp");
-    auto *res1     = builder.CreateAdd (add1, add2, "res1_tmp");
-    auto *res2     = builder.CreateAdd (res1, add3, "res2_tmp");
-    auto *res3     = builder.CreateAdd (res2, add4, "res3_tmp");
-    auto *res4     = builder.CreateAdd (res3, add5, "res4_tmp");
-    auto *resFinal = builder.CreateAdd (res4, add5, "resFinal_tmp");
+    auto *sum  = builder.CreateAdd (sumFunc->Arg (0), sumFunc->Arg (1), "sum_tmp");
+    auto *add1 = builder.CreateAdd (c3, c1, "add1_tmp");
+    auto *add2 = builder.CreateAdd (add1, c1, "add2_tmp");
+    auto *add3 = builder.CreateAdd (add2, c1, "add3_tmp");
+    auto *add4 = builder.CreateAdd (add3, c1, "add4_tmp");
+    auto *add5 = builder.CreateAdd (add4, c1, "add5_tmp");
+    // auto *add6     = builder.CreateAdd (add5, c1, "add6_tmp");
+    // auto *add7     = builder.CreateAdd (add6, c1, "add7_tmp");
+    // auto *add8     = builder.CreateAdd (add7, c1, "add8_tmp");
+    // auto *add9     = builder.CreateAdd (add8, c1, "add9_tmp");
+    // auto *add10    = builder.CreateAdd (add9, c1, "add10_tmp");
+    auto *res1 = builder.CreateAdd (add1, add2, "res1_tmp");
+    auto *res2 = builder.CreateAdd (res1, add3, "res2_tmp");
+    auto *res3 = builder.CreateAdd (res2, add4, "res3_tmp");
+    auto *res4 = builder.CreateAdd (res3, add5, "res4_tmp");
+    // auto *res5     = builder.CreateAdd (res4, add6, "res5_tmp");
+    // auto *res6     = builder.CreateAdd (res5, add7, "res6_tmp");
+    // auto *res7     = builder.CreateAdd (res6, add8, "res7_tmp");
+    // auto *res8     = builder.CreateAdd (res7, add9, "res8_tmp");
+    auto *resFinal = builder.CreateAdd (res4, add5 /* res8, add10 */, "resFinal_tmp");
     builder.CreateRet (resFinal);
     return std::move (mod);
 }

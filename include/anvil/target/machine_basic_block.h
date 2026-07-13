@@ -90,6 +90,20 @@ public:
             InsertBefore (inst, point->Next ());
         }
     }
+
+    void
+    Remove (MachineInst *inst) {
+        if (inst->_prev != nullptr) {
+            inst->_prev = inst->_next;
+        } else {
+            _start = inst->_next;
+        }
+        if (inst->_next != nullptr) {
+            inst->_next = inst->_prev;
+        } else {
+            _end = inst->_prev;
+        }
+    }
 };
 
 }
