@@ -1,5 +1,4 @@
 #pragma once
-
 #include "anvil/support/arena.h"
 
 namespace anvil {

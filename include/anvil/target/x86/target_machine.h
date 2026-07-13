@@ -11,8 +11,8 @@ public:
 
     void
     SelectInstructions (Module &inMod, MachineModule &outMod) override {
-        auto                       &mctx = outMod.Context ();
-        x86::X86InstructionSelector selector (mctx);
+        auto                  &mctx = outMod.Context ();
+        X86InstructionSelector selector (mctx);
         selector.SelectInstructions (inMod, outMod);
     }
 };

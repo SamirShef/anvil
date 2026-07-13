@@ -23,7 +23,6 @@ public:
     }
 
     uint64_t
-    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     TypeAllocSizeInBits (Type *type) const {
         switch (type->GetKind ()) {
         case Type::Kind::Integer:
