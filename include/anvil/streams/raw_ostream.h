@@ -160,6 +160,18 @@ public:
 
     // NOLINTEND(bugprone-macro-parentheses)
 
+    template <typename T>
+    RawOstream &
+    operator<< (T num)
+        requires (std::is_integral_v<T>)
+    {
+        if constexpr (std::is_signed_v<T>) {
+            return *this << static_cast<int64_t> (num);
+        } else {
+            return *this << static_cast<uint64_t> (num);
+        }
+    }
+
     RawOstream &
     operator<< (double num) {
         char localBuf[64];
