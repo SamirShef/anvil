@@ -26,6 +26,12 @@ Partition (T *begin, T *end, Comparator cmp) {
     return i;
 }
 
+template <typename Container, typename Comparator>
+void
+Sort (Container &c, Comparator cmp) {
+    Sort (c.Begin (), c.End (), cmp);
+}
+
 template <typename T, typename Comparator>
 void
 Sort (T *begin, T *end, Comparator cmp) {
