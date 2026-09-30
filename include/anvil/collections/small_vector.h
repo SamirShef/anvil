@@ -208,6 +208,26 @@ public:
         return _cap;
     }
 
+    T *
+    Begin () {
+        return _data;
+    }
+
+    const T *
+    Begin () const {
+        return _data;
+    }
+
+    T *
+    End () {
+        return _data + _len;
+    }
+
+    const T *
+    End () const {
+        return _data + _len;
+    }
+
     bool
     Contains (const T &el) const {
         for (size_t i = 0; i < _len; ++i) {
