@@ -11,7 +11,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 if(MSVC)
-    add_target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE NOMINMAX)
     target_compile_options(${PROJECT_NAME} PRIVATE /GR /EHs /EHc)
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE -fno-rtti -fno-exceptions -g)
