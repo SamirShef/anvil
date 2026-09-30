@@ -229,6 +229,17 @@ public:
     }
 
     bool
+    Empty () const {
+        return _len == 0;
+    }
+
+    T &
+    Back () {
+        assert (_len != 0);
+        return _data[_len - 1];
+    }
+
+    bool
     Contains (const T &el) const {
         for (size_t i = 0; i < _len; ++i) {
             if (_data[i] == el) {
