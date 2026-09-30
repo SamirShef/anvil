@@ -137,14 +137,14 @@ public:
     }
 
     // NOLINTBEGIN(bugprone-macro-parentheses)
-#define integet_op(prefix, bits)                                                         \
+#define integer_op(prefix, bits)                                                         \
     RawOstream &operator<< (prefix##int##bits##_t num) {                                 \
         char localBuf[21];                                                               \
         return *this << IntToStr (static_cast<prefix##int64_t> (num), localBuf);         \
     }
 
-#define uint_op(bits) integet_op (u, bits)
-#define int_op(bits) integet_op (, bits)
+#define uint_op(bits) integer_op (u, bits)
+#define int_op(bits) integer_op (, bits)
 
     uint_op (16);
     uint_op (32);
