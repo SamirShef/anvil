@@ -1,7 +1,6 @@
 #pragma once
 #include "anvil/target/liveness_analysis.h"
 #include "anvil/target/machine_function.h"
-#include "anvil/target/machine_inst.h"
 #include "anvil/target/machine_module.h"
 #include "anvil/target/reg_allocator.h"
 #include "anvil/target/x86/x86_register_info.h"
@@ -12,7 +11,7 @@ class X86RegisterAllocator : public RegisterAllocator {
 public:
     X86RegisterAllocator (MachineContext &mctx, LivenessAnalysis &liveness)
         : RegisterAllocator (mctx, liveness) {
-        _availableRegs = { RAX, RCX, RDX, RSI, RDI, R8, R9, R10, R11 };
+        _availableRegs = { RAX, RBX, RCX, RDX, RSI, RDI, R8, R9, R12, R13, R14, R15 };
     }
 
     void
@@ -24,13 +23,13 @@ public:
 
 private:
     void
+    linearScan (MachineFunction *func);
+
+    void
+    rewriteRegs (MachineFunction *func);
+
+    void
     allocFunction (MachineFunction *func);
-
-    void
-    allocInst (MachineInst *inst);
-
-    void
-    allocReg (MachineOperand &op, MachineInst *inst);
 };
 
 }

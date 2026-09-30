@@ -4,12 +4,14 @@
 
 namespace anvil {
 
+using StackSlot = uint32_t;
+
 class MachineFunction {
     friend class MachineModule;
     std::string_view   _name;
     MachineBasicBlock *_blocksStart{};
     MachineBasicBlock *_blocksEnd{};
-    int                _nextFrameIndex = 0;
+    StackSlot          _nextFrameIndex = 0;
     MachineFunction   *_prev{};
     MachineFunction   *_next{};
 
@@ -39,12 +41,12 @@ public:
         }
     }
 
-    int
+    StackSlot
     CreateStackSlot () {
         return _nextFrameIndex++;
     }
 
-    int
+    StackSlot
     NumStackSlots () const {
         return _nextFrameIndex;
     }
