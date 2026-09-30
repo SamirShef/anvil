@@ -122,6 +122,8 @@ X86AsmPrinter::physicalRegName (uint32_t id) {
     switch ((x86::RegInfo) id) {
     case RAX:
         return "rax";
+    case RBX:
+        return "rbx";
     case RCX:
         return "rcx";
     case RDX:
@@ -138,6 +140,14 @@ X86AsmPrinter::physicalRegName (uint32_t id) {
         return "r10";
     case R11:
         return "r11";
+    case R12:
+        return "r12";
+    case R13:
+        return "r13";
+    case R14:
+        return "r14";
+    case R15:
+        return "r15";
     case RBP:
         return "rbp";
     case RSP:
