@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-pub type InstId = usize;
-pub type BasicBlockId = usize;
-pub type FunctionId = usize;
+pub struct InstId(pub usize);
+pub struct BasicBlockId(pub usize);
+pub struct FunctionId(pub usize);
 
 pub enum Inst {
     Binary(InstId, InstId),
