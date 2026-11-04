@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub type InstId = usize;
 pub type BasicBlockId = usize;
 pub type FunctionId = usize;
@@ -18,4 +20,12 @@ pub struct BasicBlock {
 
 pub struct Function {
     pub body: Vec<BasicBlock>,
+}
+
+pub struct Context {
+    funcs: Vec<Function>,
+
+    inst_names: HashMap<InstId, String>,
+    bb_names: HashMap<BasicBlockId, String>,
+    funcs_names: HashMap<FunctionId, String>,
 }
