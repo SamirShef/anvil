@@ -22,10 +22,15 @@ pub struct Function {
     pub body: Vec<BasicBlock>,
 }
 
+pub enum NameVariant {
+    Name(String),
+    Id(usize),
+}
+
 pub struct Context {
     funcs: Vec<Function>,
 
-    inst_names: HashMap<InstId, String>,
-    bb_names: HashMap<BasicBlockId, String>,
-    funcs_names: HashMap<FunctionId, String>,
+    inst_names: HashMap<InstId, NameVariant>,
+    bb_names: HashMap<BasicBlockId, NameVariant>,
+    funcs_names: HashMap<FunctionId, NameVariant>,
 }
