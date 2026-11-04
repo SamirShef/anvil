@@ -1,26 +1,21 @@
 pub type InstId = usize;
+pub type BasicBlockId = usize;
+pub type FunctionId = usize;
 
-pub enum InstData {
+pub enum Inst {
     Binary(InstId, InstId),
-    Call(Function),
-    Jump(BasicBlock),
-    JumpIf(InstId, BasicBlock, BasicBlock),
+    Call(FunctionId),
+    Jump(BasicBlockId),
+    JumpIf(InstId, BasicBlockId, BasicBlockId),
     Alloca,
     Load(InstId),
     Store(InstId),
 }
 
-pub struct Inst {
-    pub name: String,
-    pub data: InstData,
-}
-
 pub struct BasicBlock {
-    pub name: String,
     pub body: Vec<Inst>,
 }
 
 pub struct Function {
-    pub name: String,
     pub body: Vec<BasicBlock>,
 }
