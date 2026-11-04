@@ -32,5 +32,5 @@ pub struct Context {
 
     inst_names: HashMap<InstId, NameVariant>,
     bb_names: HashMap<BasicBlockId, NameVariant>,
-    funcs_names: HashMap<FunctionId, NameVariant>,
+    func_names: HashMap<FunctionId, NameVariant>,
 }
