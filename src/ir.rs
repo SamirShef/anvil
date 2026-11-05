@@ -9,15 +9,31 @@ pub struct BasicBlockId(pub usize);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct FunctionId(pub usize);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Inst {
-    Binary(InstId, InstId),
-    Call(FunctionId),
-    Jump(BasicBlockId),
-    JumpIf(InstId, BasicBlockId, BasicBlockId),
+    Binary {
+        left: InstId,
+        right: InstId,
+    },
+    Call {
+        callee: FunctionId,
+        args: Vec<InstId>,
+    },
+    Jump {
+        bb: BasicBlockId,
+    },
+    JumpIf {
+        cond: InstId,
+        then_bb: BasicBlockId,
+        else_bb: BasicBlockId,
+    },
     Alloca,
-    Load(InstId),
-    Store(InstId),
+    Load {
+        ptr: InstId,
+    },
+    Store {
+        ptr: InstId,
+    },
 }
 
 pub struct BasicBlock {
@@ -265,31 +281,40 @@ mod test {
         context.get_func_mut(func_id).unwrap().insert_inst_after(
             BasicBlockId(0),
             InstId(0),
-            Inst::Call(FunctionId(0)),
+            Inst::Call {
+                callee: FunctionId(0),
+                args: Vec::new(),
+            },
         );
 
         assert_eq!(context.funcs[func_id.0].body[0].body.len(), 2);
         assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
         assert_eq!(
             context.funcs[func_id.0].body[0].body[1],
-            Inst::Call(FunctionId(0))
+            Inst::Call {
+                callee: FunctionId(0),
+                args: Vec::new(),
+            }
         );
 
         context.get_func_mut(func_id).unwrap().insert_inst_before(
             BasicBlockId(0),
             InstId(1),
-            Inst::Load(InstId(0)),
+            Inst::Load { ptr: InstId(0) },
         );
 
         assert_eq!(context.funcs[func_id.0].body[0].body.len(), 3);
         assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
         assert_eq!(
             context.funcs[func_id.0].body[0].body[1],
-            Inst::Load(InstId(0))
+            Inst::Load { ptr: InstId(0) }
         );
         assert_eq!(
             context.funcs[func_id.0].body[0].body[2],
-            Inst::Call(FunctionId(0))
+            Inst::Call {
+                callee: FunctionId(0),
+                args: Vec::new(),
+            }
         );
     }
 }
