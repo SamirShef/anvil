@@ -9,6 +9,7 @@ pub struct BasicBlockId(pub usize);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct FunctionId(pub usize);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Inst {
     Binary(InstId, InstId),
     Call(FunctionId),
@@ -37,19 +38,22 @@ impl BasicBlock {
     }
 
     pub fn insert_inst_after(&mut self, after: InstId, inst: Inst) {
-        if after.0 >= self.body.len() {
+        if after.0 + 1 >= self.body.len() {
             return self.insert_inst(inst);
         }
 
-        self.body.insert(after.0, inst);
+        self.body.insert(after.0 + 1, inst);
     }
 
     pub fn insert_inst_before(&mut self, before: InstId, inst: Inst) {
         if before.0 == 0 {
             return self.body.insert(0, inst);
         }
+        if before.0 >= self.body.len() {
+            return self.body.insert(self.body.len() - 1, inst);
+        }
 
-        self.body.insert(before.0 - 1, inst);
+        self.body.insert(before.0, inst);
     }
 }
 
@@ -115,6 +119,14 @@ impl Context {
         }
     }
 
+    pub fn get_func(&self, func_id: FunctionId) -> Option<&Function> {
+        self.funcs.get(func_id.0)
+    }
+
+    pub fn get_func_mut(&mut self, func_id: FunctionId) -> Option<&mut Function> {
+        self.funcs.get_mut(func_id.0)
+    }
+
     pub fn create_bb(&mut self, func_id: FunctionId) -> Option<BasicBlockId> {
         self.create_bb_with_name(func_id, "")
     }
@@ -144,5 +156,104 @@ impl Context {
         self.func_names.insert(id, name.into().clone());
 
         Some(id)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn create_function() {
+        let mut context = Context::new();
+        context.create_function();
+
+        assert_eq!(context.funcs.len(), 1);
+        assert_eq!(context.func_names.len(), 1);
+        assert!(context.func_names.get(&FunctionId(0)).unwrap().is_empty());
+
+        context.create_function_with_name("main");
+
+        assert_eq!(context.funcs.len(), 2);
+        assert_eq!(context.func_names.len(), 2);
+        assert_eq!(context.func_names.get(&FunctionId(1)).unwrap(), "main");
+    }
+
+    #[test]
+    fn create_basic_block() {
+        let mut context = Context::new();
+        let func_id = context.create_function();
+
+        assert_eq!(context.funcs.len(), 1);
+        assert_eq!(context.func_names.len(), 1);
+        assert!(context.func_names.get(&FunctionId(0)).unwrap().is_empty());
+
+        let func_id = func_id.unwrap();
+        context.create_bb(func_id);
+
+        assert_eq!(context.funcs[func_id.0].body.len(), 1);
+        assert_eq!(context.bb_names.len(), 1);
+        assert!(context.bb_names.get(&BasicBlockId(0)).unwrap().is_empty());
+
+        context.create_bb_with_name(func_id, "entry");
+
+        assert_eq!(context.funcs[func_id.0].body.len(), 2);
+        assert_eq!(context.bb_names.len(), 2);
+        assert_eq!(context.bb_names.get(&BasicBlockId(1)).unwrap(), "entry");
+    }
+
+    #[test]
+    fn create_instruction() {
+        let mut context = Context::new();
+        let func_id = context.create_function();
+
+        assert_eq!(context.funcs.len(), 1);
+        assert_eq!(context.func_names.len(), 1);
+        assert!(context.func_names.get(&FunctionId(0)).unwrap().is_empty());
+
+        let func_id = func_id.unwrap();
+        context.create_bb(func_id);
+
+        assert_eq!(context.funcs[func_id.0].body.len(), 1);
+        assert_eq!(context.bb_names.len(), 1);
+        assert!(context.bb_names.get(&BasicBlockId(0)).unwrap().is_empty());
+
+        context
+            .get_func_mut(func_id)
+            .unwrap()
+            .insert_inst(BasicBlockId(0), Inst::Alloca);
+
+        assert_eq!(context.funcs[func_id.0].body[0].body.len(), 1);
+        assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
+
+        context.get_func_mut(func_id).unwrap().insert_inst_after(
+            BasicBlockId(0),
+            InstId(0),
+            Inst::Call(FunctionId(0)),
+        );
+
+        assert_eq!(context.funcs[func_id.0].body[0].body.len(), 2);
+        assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
+        assert_eq!(
+            context.funcs[func_id.0].body[0].body[1],
+            Inst::Call(FunctionId(0))
+        );
+
+        context.get_func_mut(func_id).unwrap().insert_inst_before(
+            BasicBlockId(0),
+            InstId(1),
+            Inst::Load(InstId(0)),
+        );
+
+        assert_eq!(context.funcs[func_id.0].body[0].body.len(), 3);
+        assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
+        assert_eq!(
+            context.funcs[func_id.0].body[0].body[1],
+            Inst::Load(InstId(0))
+        );
+        assert_eq!(
+            context.funcs[func_id.0].body[0].body[2],
+            Inst::Call(FunctionId(0))
+        );
     }
 }
