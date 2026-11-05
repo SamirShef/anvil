@@ -147,7 +147,7 @@ impl Context {
     }
 
     pub fn create_bb(&mut self, func_id: FunctionId) -> Option<BasicBlockId> {
-        self.create_bb_with_name(func_id, "")
+        self.create_bb_impl(func_id)
     }
 
     pub fn create_bb_with_name(
@@ -155,24 +155,37 @@ impl Context {
         func_id: FunctionId,
         name: impl Into<String>,
     ) -> Option<BasicBlockId> {
+        let id = self.create_bb_impl(func_id);
+        self.bb_names.insert((func_id, id.unwrap()), name.into());
+
+        id
+    }
+
+    fn create_bb_impl(&mut self, func_id: FunctionId) -> Option<BasicBlockId> {
         let idx = func_id.0;
         let id = BasicBlockId(self.funcs[idx].body.len());
         self.funcs[idx].body.push(BasicBlock::new());
-
-        self.bb_names.insert((func_id, id), name.into());
 
         Some(id)
     }
 
     pub fn create_function(&mut self) -> Option<FunctionId> {
-        self.create_function_with_name("")
+        self.create_function_impl()
     }
 
     pub fn create_function_with_name(&mut self, name: impl Into<String>) -> Option<FunctionId> {
+        let id = self.create_function_impl();
+        if id.is_none() {
+            return None;
+        }
+
+        self.func_names.insert(id.unwrap(), name.into());
+        id
+    }
+
+    fn create_function_impl(&mut self) -> Option<FunctionId> {
         let id = FunctionId(self.funcs.len());
         self.funcs.push(Function::new());
-
-        self.func_names.insert(id, name.into());
 
         Some(id)
     }
@@ -206,13 +219,12 @@ mod test {
         context.create_function();
 
         assert_eq!(context.funcs.len(), 1);
-        assert_eq!(context.func_names.len(), 1);
-        assert!(context.func_names.get(&FunctionId(0)).unwrap().is_empty());
+        assert!(context.func_names.is_empty());
 
         context.create_function_with_name("main");
 
         assert_eq!(context.funcs.len(), 2);
-        assert_eq!(context.func_names.len(), 2);
+        assert_eq!(context.func_names.len(), 1);
         assert_eq!(context.func_names.get(&FunctionId(1)).unwrap(), "main");
     }
 
@@ -222,26 +234,18 @@ mod test {
         let func_id = context.create_function();
 
         assert_eq!(context.funcs.len(), 1);
-        assert_eq!(context.func_names.len(), 1);
-        assert!(context.func_names.get(&FunctionId(0)).unwrap().is_empty());
+        assert!(context.func_names.is_empty());
 
         let func_id = func_id.unwrap();
         context.create_bb(func_id);
 
         assert_eq!(context.funcs[func_id.0].body.len(), 1);
-        assert_eq!(context.bb_names.len(), 1);
-        assert!(
-            context
-                .bb_names
-                .get(&(func_id, BasicBlockId(0)))
-                .unwrap()
-                .is_empty()
-        );
+        assert!(context.bb_names.is_empty());
 
         context.create_bb_with_name(func_id, "entry");
 
         assert_eq!(context.funcs[func_id.0].body.len(), 2);
-        assert_eq!(context.bb_names.len(), 2);
+        assert_eq!(context.bb_names.len(), 1);
         assert_eq!(
             context.bb_names.get(&(func_id, BasicBlockId(1))).unwrap(),
             "entry"
@@ -251,23 +255,20 @@ mod test {
     #[test]
     fn create_instruction() {
         let mut context = Context::new();
-        let func_id = context.create_function();
+        let func_id = context.create_function_with_name("main");
 
         assert_eq!(context.funcs.len(), 1);
         assert_eq!(context.func_names.len(), 1);
-        assert!(context.func_names.get(&FunctionId(0)).unwrap().is_empty());
+        assert_eq!(context.func_names.get(&FunctionId(0)).unwrap(), "main");
 
         let func_id = func_id.unwrap();
-        context.create_bb(func_id);
+        context.create_bb_with_name(func_id, "entry");
 
         assert_eq!(context.funcs[func_id.0].body.len(), 1);
         assert_eq!(context.bb_names.len(), 1);
-        assert!(
-            context
-                .bb_names
-                .get(&(func_id, BasicBlockId(0)))
-                .unwrap()
-                .is_empty()
+        assert_eq!(
+            context.bb_names.get(&(func_id, BasicBlockId(0))).unwrap(),
+            "entry"
         );
 
         context
