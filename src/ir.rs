@@ -9,9 +9,19 @@ pub struct BasicBlockId(pub usize);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct FunctionId(pub usize);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BinaryKind {
+    Add,
+    Sub,
+    Mul,
+    Div,
+    Rem,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Inst {
     Binary {
+        kind: BinaryKind,
         left: InstId,
         right: InstId,
     },
@@ -49,30 +59,36 @@ impl BasicBlock {
         self.body.get(idx.0)
     }
 
-    pub fn insert_inst(&mut self, inst: Inst) {
+    pub fn insert_inst(&mut self, inst: Inst) -> Option<InstId> {
         self.body.push(inst);
+        Some(InstId(self.body.len() - 1))
     }
 
-    pub fn insert_inst_after(&mut self, after: InstId, inst: Inst) {
+    pub fn insert_inst_after(&mut self, after: InstId, inst: Inst) -> Option<InstId> {
         if self.body.is_empty() {
-            return self.body.push(inst);
+            self.body.push(inst);
+            return Some(InstId(self.body.len() - 1));
         }
         if after.0 + 1 >= self.body.len() {
             return self.insert_inst(inst);
         }
 
         self.body.insert(after.0 + 1, inst);
+        Some(InstId(after.0 + 1))
     }
 
-    pub fn insert_inst_before(&mut self, before: InstId, inst: Inst) {
+    pub fn insert_inst_before(&mut self, before: InstId, inst: Inst) -> Option<InstId> {
         if before.0 >= self.body.len() || self.body.is_empty() {
-            return self.body.push(inst);
+            self.body.push(inst);
+            return Some(InstId(self.body.len() - 1));
         }
         if before.0 == 0 {
-            return self.body.insert(0, inst);
+            self.body.insert(0, inst);
+            return Some(InstId(0));
         }
 
         self.body.insert(before.0, inst);
+        Some(InstId(before.0 + 1))
     }
 }
 
@@ -175,9 +191,7 @@ impl Context {
 
     pub fn create_function_with_name(&mut self, name: impl Into<String>) -> Option<FunctionId> {
         let id = self.create_function_impl();
-        if id.is_none() {
-            return None;
-        }
+        id?;
 
         self.func_names.insert(id.unwrap(), name.into());
         id
@@ -206,6 +220,66 @@ impl IRBuilder {
             cur_unnamed_func_idx: 0,
             cur_unnamed_local_idx: 0,
         }
+    }
+
+    pub fn set_insert_point(&mut self, func: FunctionId, bb: BasicBlockId) {
+        self.cur_func = Some(func);
+        self.cur_bb = Some(bb);
+    }
+
+    pub fn create_function(&mut self, ctx: &mut Context) -> Option<FunctionId> {
+        let name = self.cur_unnamed_func_idx.to_string();
+        self.create_function_with_name(ctx, name)
+    }
+
+    pub fn create_function_with_name(
+        &mut self,
+        ctx: &mut Context,
+        name: impl Into<String>,
+    ) -> Option<FunctionId> {
+        ctx.create_function_with_name(name.into())
+    }
+
+    pub fn create_bb(&mut self, ctx: &mut Context, func_id: FunctionId) -> Option<BasicBlockId> {
+        let name = self.cur_unnamed_func_idx.to_string();
+        self.create_bb_with_name(ctx, func_id, name)
+    }
+
+    pub fn create_bb_with_name(
+        &mut self,
+        ctx: &mut Context,
+        func_id: FunctionId,
+        name: impl Into<String>,
+    ) -> Option<BasicBlockId> {
+        ctx.create_bb_with_name(func_id, name.into())
+    }
+
+    pub fn emit_add(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
+        let name = self.cur_unnamed_local_idx.to_string();
+        self.emit_add_with_name(ctx, left, right, name)
+    }
+
+    pub fn emit_add_with_name(
+        &mut self,
+        ctx: &mut Context,
+        left: InstId,
+        right: InstId,
+        name: impl Into<String>,
+    ) -> Option<InstId> {
+        self.cur_bb?;
+
+        let bb = ctx.funcs[self.cur_func.unwrap().0]
+            .body
+            .get_mut(self.cur_bb.unwrap().0)
+            .unwrap();
+        let id = bb.insert_inst(Inst::Binary {
+            kind: BinaryKind::Add,
+            left,
+            right,
+        });
+        ctx.inst_names.insert(id.unwrap(), name.into());
+
+        id
     }
 }
 
