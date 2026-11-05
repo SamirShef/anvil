@@ -105,7 +105,7 @@ pub struct Context {
     funcs: Vec<Function>,
 
     inst_names: HashMap<InstId, String>,
-    bb_names: HashMap<BasicBlockId, String>,
+    bb_names: HashMap<(FunctionId, BasicBlockId), String>,
     func_names: HashMap<FunctionId, String>,
 }
 
@@ -140,7 +140,7 @@ impl Context {
         let id = BasicBlockId(self.funcs[idx].body.len());
         self.funcs[idx].body.push(BasicBlock::new());
 
-        self.bb_names.insert(id, name.into().clone());
+        self.bb_names.insert((func_id, id), name.into().clone());
 
         Some(id)
     }
@@ -193,13 +193,22 @@ mod test {
 
         assert_eq!(context.funcs[func_id.0].body.len(), 1);
         assert_eq!(context.bb_names.len(), 1);
-        assert!(context.bb_names.get(&BasicBlockId(0)).unwrap().is_empty());
+        assert!(
+            context
+                .bb_names
+                .get(&(func_id, BasicBlockId(0)))
+                .unwrap()
+                .is_empty()
+        );
 
         context.create_bb_with_name(func_id, "entry");
 
         assert_eq!(context.funcs[func_id.0].body.len(), 2);
         assert_eq!(context.bb_names.len(), 2);
-        assert_eq!(context.bb_names.get(&BasicBlockId(1)).unwrap(), "entry");
+        assert_eq!(
+            context.bb_names.get(&(func_id, BasicBlockId(1))).unwrap(),
+            "entry"
+        );
     }
 
     #[test]
@@ -216,7 +225,13 @@ mod test {
 
         assert_eq!(context.funcs[func_id.0].body.len(), 1);
         assert_eq!(context.bb_names.len(), 1);
-        assert!(context.bb_names.get(&BasicBlockId(0)).unwrap().is_empty());
+        assert!(
+            context
+                .bb_names
+                .get(&(func_id, BasicBlockId(0)))
+                .unwrap()
+                .is_empty()
+        );
 
         context
             .get_func_mut(func_id)
