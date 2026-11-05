@@ -162,6 +162,24 @@ impl Context {
     }
 }
 
+pub struct IRBuilder {
+    cur_func: Option<FunctionId>,
+    cur_bb: Option<BasicBlockId>,
+    cur_unnamed_func_idx: usize,
+    cur_unnamed_local_idx: usize,
+}
+
+impl IRBuilder {
+    pub fn new() -> Self {
+        Self {
+            cur_func: None,
+            cur_bb: None,
+            cur_unnamed_func_idx: 0,
+            cur_unnamed_local_idx: 0,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
