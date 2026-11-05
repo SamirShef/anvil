@@ -49,14 +49,11 @@ impl BasicBlock {
     }
 
     pub fn insert_inst_before(&mut self, before: InstId, inst: Inst) {
-        if self.body.is_empty() {
+        if before.0 >= self.body.len() || self.body.is_empty() {
             return self.body.push(inst);
         }
         if before.0 == 0 {
             return self.body.insert(0, inst);
-        }
-        if before.0 >= self.body.len() {
-            return self.body.insert(self.body.len() - 1, inst);
         }
 
         self.body.insert(before.0, inst);
