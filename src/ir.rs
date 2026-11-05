@@ -27,6 +27,30 @@ impl BasicBlock {
     pub fn new() -> Self {
         Self { body: Vec::new() }
     }
+
+    pub fn get_inst(&self, idx: InstId) -> Option<&Inst> {
+        self.body.get(idx.0)
+    }
+
+    pub fn insert_inst(&mut self, inst: Inst) {
+        self.body.push(inst);
+    }
+
+    pub fn insert_inst_after(&mut self, after: InstId, inst: Inst) {
+        if after.0 >= self.body.len() {
+            return self.insert_inst(inst);
+        }
+
+        self.body.insert(after.0, inst);
+    }
+
+    pub fn insert_inst_before(&mut self, before: InstId, inst: Inst) {
+        if before.0 == 0 {
+            return self.body.insert(0, inst);
+        }
+
+        self.body.insert(before.0 - 1, inst);
+    }
 }
 
 pub struct Function {
@@ -36,6 +60,40 @@ pub struct Function {
 impl Function {
     pub fn new() -> Self {
         Self { body: Vec::new() }
+    }
+
+    pub fn get_bb(&self, idx: BasicBlockId) -> Option<&BasicBlock> {
+        self.body.get(idx.0)
+    }
+
+    pub fn insert_inst(&mut self, idx: BasicBlockId, inst: Inst) -> bool {
+        let bb = self.body.get_mut(idx.0);
+        if bb.is_none() {
+            return false;
+        }
+
+        bb.unwrap().insert_inst(inst);
+        true
+    }
+
+    pub fn insert_inst_after(&mut self, idx: BasicBlockId, after: InstId, inst: Inst) -> bool {
+        let bb = self.body.get_mut(idx.0);
+        if bb.is_none() {
+            return false;
+        }
+
+        bb.unwrap().insert_inst_after(after, inst);
+        true
+    }
+
+    pub fn insert_inst_before(&mut self, idx: BasicBlockId, before: InstId, inst: Inst) -> bool {
+        let bb = self.body.get_mut(idx.0);
+        if bb.is_none() {
+            return false;
+        }
+
+        bb.unwrap().insert_inst_before(before, inst);
+        true
     }
 }
 
