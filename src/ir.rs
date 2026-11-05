@@ -146,7 +146,7 @@ impl Context {
         let id = BasicBlockId(self.funcs[idx].body.len());
         self.funcs[idx].body.push(BasicBlock::new());
 
-        self.bb_names.insert((func_id, id), name.into().clone());
+        self.bb_names.insert((func_id, id), name.into());
 
         Some(id)
     }
@@ -159,7 +159,7 @@ impl Context {
         let id = FunctionId(self.funcs.len());
         self.funcs.push(Function::new());
 
-        self.func_names.insert(id, name.into().clone());
+        self.func_names.insert(id, name.into());
 
         Some(id)
     }
