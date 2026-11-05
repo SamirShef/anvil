@@ -39,17 +39,12 @@ impl Function {
     }
 }
 
-pub enum NameVariant {
-    Name(String),
-    Id(usize),
-}
-
 pub struct Context {
     funcs: Vec<Function>,
 
-    inst_names: HashMap<InstId, NameVariant>,
-    bb_names: HashMap<BasicBlockId, NameVariant>,
-    func_names: HashMap<FunctionId, NameVariant>,
+    inst_names: HashMap<InstId, String>,
+    bb_names: HashMap<BasicBlockId, String>,
+    func_names: HashMap<FunctionId, String>,
 }
 
 impl Context {
@@ -75,8 +70,7 @@ impl Context {
         let id = BasicBlockId(self.funcs[idx].body.len());
         self.funcs[idx].body.push(BasicBlock::new());
 
-        self.bb_names
-            .insert(id, NameVariant::Name(name.into().clone()));
+        self.bb_names.insert(id, name.into().clone());
 
         Some(id)
     }
@@ -89,8 +83,7 @@ impl Context {
         let id = FunctionId(self.funcs.len());
         self.funcs.push(Function::new());
 
-        self.func_names
-            .insert(id, NameVariant::Name(name.into().clone()));
+        self.func_names.insert(id, name.into().clone());
 
         Some(id)
     }
