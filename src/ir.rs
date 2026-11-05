@@ -38,6 +38,9 @@ impl BasicBlock {
     }
 
     pub fn insert_inst_after(&mut self, after: InstId, inst: Inst) {
+        if self.body.is_empty() {
+            return self.body.push(inst);
+        }
         if after.0 + 1 >= self.body.len() {
             return self.insert_inst(inst);
         }
@@ -46,6 +49,9 @@ impl BasicBlock {
     }
 
     pub fn insert_inst_before(&mut self, before: InstId, inst: Inst) {
+        if self.body.is_empty() {
+            return self.body.push(inst);
+        }
         if before.0 == 0 {
             return self.body.insert(0, inst);
         }
