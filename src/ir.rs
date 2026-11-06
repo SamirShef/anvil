@@ -229,6 +229,7 @@ impl IRBuilder {
 
     pub fn create_function(&mut self, ctx: &mut Context) -> Option<FunctionId> {
         let name = self.cur_unnamed_func_idx.to_string();
+        self.cur_unnamed_func_idx += 1;
         self.create_function_with_name(ctx, name)
     }
 
@@ -241,7 +242,8 @@ impl IRBuilder {
     }
 
     pub fn create_bb(&mut self, ctx: &mut Context, func_id: FunctionId) -> Option<BasicBlockId> {
-        let name = self.cur_unnamed_func_idx.to_string();
+        let name = self.cur_unnamed_local_idx.to_string();
+        self.cur_unnamed_local_idx += 1;
         self.create_bb_with_name(ctx, func_id, name)
     }
 
@@ -274,6 +276,7 @@ impl IRBuilder {
 
     pub fn emit_add(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
         let name = self.cur_unnamed_local_idx.to_string();
+        self.cur_unnamed_local_idx += 1;
         self.emit_add_with_name(ctx, left, right, name)
     }
 
