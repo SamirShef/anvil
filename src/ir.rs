@@ -289,15 +289,7 @@ impl IRBuilder {
         right: InstId,
         name: impl Into<String>,
     ) -> Option<InstId> {
-        self.emit_inst(
-            ctx,
-            Inst::Binary {
-                kind: BinaryKind::Add,
-                left,
-                right,
-            },
-            name,
-        )
+        self.emit_inst(ctx, Inst::Binary { kind, left, right }, name)
     }
 
     pub fn emit_add(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
