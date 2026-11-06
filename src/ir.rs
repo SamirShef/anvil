@@ -18,32 +18,32 @@ pub enum BinaryKind {
     Rem,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Inst {
     Binary {
         kind: BinaryKind,
-        left: InstId,
-        right: InstId,
+        left: Value,
+        right: Value,
     },
     Call {
-        callee: InstId,
-        args: Vec<InstId>,
+        callee: Value,
+        args: Vec<Value>,
     },
     Jump {
         bb: BasicBlockId,
     },
     JumpIf {
-        cond: InstId,
+        cond: Value,
         then_bb: BasicBlockId,
         else_bb: BasicBlockId,
     },
     Alloca,
     Load {
-        ptr: InstId,
+        ptr: Value,
     },
     Store {
-        ptr: InstId,
-        val: InstId,
+        ptr: Value,
+        val: Value,
     },
 }
 
@@ -135,6 +135,21 @@ impl Function {
         bb.unwrap().insert_inst_before(before, inst);
         true
     }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ConstValue {
+    Int(u64),
+    Float(f64),
+    Bool(bool),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Value {
+    Const(ConstValue),
+    Inst(InstId),
+    FuncPtr(FunctionId),
+    BasicBlock(BasicBlockId),
 }
 
 pub struct Context {
@@ -285,14 +300,14 @@ impl IRBuilder {
         &mut self,
         ctx: &mut Context,
         kind: BinaryKind,
-        left: InstId,
-        right: InstId,
+        left: Value,
+        right: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_inst(ctx, Inst::Binary { kind, left, right }, name)
     }
 
-    pub fn emit_add(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
+    pub fn emit_add(&mut self, ctx: &mut Context, left: Value, right: Value) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_add_with_name(ctx, left, right, name)
     }
@@ -300,14 +315,14 @@ impl IRBuilder {
     pub fn emit_add_with_name(
         &mut self,
         ctx: &mut Context,
-        left: InstId,
-        right: InstId,
+        left: Value,
+        right: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_binary(ctx, BinaryKind::Add, left, right, name)
     }
 
-    pub fn emit_sub(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
+    pub fn emit_sub(&mut self, ctx: &mut Context, left: Value, right: Value) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_sub_with_name(ctx, left, right, name)
     }
@@ -315,14 +330,14 @@ impl IRBuilder {
     pub fn emit_sub_with_name(
         &mut self,
         ctx: &mut Context,
-        left: InstId,
-        right: InstId,
+        left: Value,
+        right: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_binary(ctx, BinaryKind::Sub, left, right, name)
     }
 
-    pub fn emit_mul(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
+    pub fn emit_mul(&mut self, ctx: &mut Context, left: Value, right: Value) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_mul_with_name(ctx, left, right, name)
     }
@@ -330,14 +345,14 @@ impl IRBuilder {
     pub fn emit_mul_with_name(
         &mut self,
         ctx: &mut Context,
-        left: InstId,
-        right: InstId,
+        left: Value,
+        right: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_binary(ctx, BinaryKind::Mul, left, right, name)
     }
 
-    pub fn emit_div(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
+    pub fn emit_div(&mut self, ctx: &mut Context, left: Value, right: Value) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_div_with_name(ctx, left, right, name)
     }
@@ -345,14 +360,14 @@ impl IRBuilder {
     pub fn emit_div_with_name(
         &mut self,
         ctx: &mut Context,
-        left: InstId,
-        right: InstId,
+        left: Value,
+        right: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_binary(ctx, BinaryKind::Div, left, right, name)
     }
 
-    pub fn emit_rem(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
+    pub fn emit_rem(&mut self, ctx: &mut Context, left: Value, right: Value) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_rem_with_name(ctx, left, right, name)
     }
@@ -360,8 +375,8 @@ impl IRBuilder {
     pub fn emit_rem_with_name(
         &mut self,
         ctx: &mut Context,
-        left: InstId,
-        right: InstId,
+        left: Value,
+        right: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_binary(ctx, BinaryKind::Rem, left, right, name)
@@ -370,8 +385,8 @@ impl IRBuilder {
     pub fn emit_call(
         &mut self,
         ctx: &mut Context,
-        callee: InstId,
-        args: Vec<InstId>,
+        callee: Value,
+        args: Vec<Value>,
     ) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_call_with_name(ctx, callee, args, name)
@@ -380,8 +395,8 @@ impl IRBuilder {
     pub fn emit_call_with_name(
         &mut self,
         ctx: &mut Context,
-        callee: InstId,
-        args: Vec<InstId>,
+        callee: Value,
+        args: Vec<Value>,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_inst(ctx, Inst::Call { callee, args }, name)
@@ -404,7 +419,7 @@ impl IRBuilder {
     pub fn emit_jump_if(
         &mut self,
         ctx: &mut Context,
-        cond: InstId,
+        cond: Value,
         then_bb: BasicBlockId,
         else_bb: BasicBlockId,
     ) -> Option<InstId> {
@@ -415,7 +430,7 @@ impl IRBuilder {
     pub fn emit_jump_if_with_name(
         &mut self,
         ctx: &mut Context,
-        cond: InstId,
+        cond: Value,
         then_bb: BasicBlockId,
         else_bb: BasicBlockId,
         name: impl Into<String>,
@@ -444,7 +459,7 @@ impl IRBuilder {
         self.emit_inst(ctx, Inst::Alloca, name)
     }
 
-    pub fn emit_load(&mut self, ctx: &mut Context, ptr: InstId) -> Option<InstId> {
+    pub fn emit_load(&mut self, ctx: &mut Context, ptr: Value) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_load_with_name(ctx, ptr, name)
     }
@@ -452,13 +467,13 @@ impl IRBuilder {
     pub fn emit_load_with_name(
         &mut self,
         ctx: &mut Context,
-        ptr: InstId,
+        ptr: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_inst(ctx, Inst::Load { ptr }, name)
     }
 
-    pub fn emit_store(&mut self, ctx: &mut Context, ptr: InstId, val: InstId) -> Option<InstId> {
+    pub fn emit_store(&mut self, ctx: &mut Context, ptr: Value, val: Value) -> Option<InstId> {
         let name = self.get_next_inst_name();
         self.emit_store_with_name(ctx, ptr, val, name)
     }
@@ -466,8 +481,8 @@ impl IRBuilder {
     pub fn emit_store_with_name(
         &mut self,
         ctx: &mut Context,
-        ptr: InstId,
-        val: InstId,
+        ptr: Value,
+        val: Value,
         name: impl Into<String>,
     ) -> Option<InstId> {
         self.emit_inst(ctx, Inst::Store { ptr, val }, name)
@@ -548,7 +563,7 @@ mod test {
             BasicBlockId(0),
             InstId(0),
             Inst::Call {
-                callee: InstId(0),
+                callee: Value::Inst(InstId(0)),
                 args: Vec::new(),
             },
         );
@@ -558,7 +573,7 @@ mod test {
         assert_eq!(
             context.funcs[func_id.0].body[0].body[1],
             Inst::Call {
-                callee: InstId(0),
+                callee: Value::Inst(InstId(0)),
                 args: Vec::new(),
             }
         );
@@ -566,19 +581,23 @@ mod test {
         context.get_func_mut(func_id).unwrap().insert_inst_before(
             BasicBlockId(0),
             InstId(1),
-            Inst::Load { ptr: InstId(0) },
+            Inst::Load {
+                ptr: Value::Inst(InstId(0)),
+            },
         );
 
         assert_eq!(context.funcs[func_id.0].body[0].body.len(), 3);
         assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
         assert_eq!(
             context.funcs[func_id.0].body[0].body[1],
-            Inst::Load { ptr: InstId(0) }
+            Inst::Load {
+                ptr: Value::Inst(InstId(0))
+            }
         );
         assert_eq!(
             context.funcs[func_id.0].body[0].body[2],
             Inst::Call {
-                callee: InstId(0),
+                callee: Value::Inst(InstId(0)),
                 args: Vec::new(),
             }
         );
@@ -611,32 +630,34 @@ mod test {
         assert_eq!(context.funcs[func_id.0].body[0].body.len(), 1);
         assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
 
-        builder.emit_call(&mut context, InstId(0), Vec::new());
+        builder.emit_call(&mut context, Value::Inst(InstId(0)), Vec::new());
 
         assert_eq!(context.funcs[func_id.0].body[0].body.len(), 2);
         assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
         assert_eq!(
             context.funcs[func_id.0].body[0].body[1],
             Inst::Call {
-                callee: InstId(0),
+                callee: Value::Inst(InstId(0)),
                 args: Vec::new(),
             }
         );
 
-        builder.emit_load(&mut context, InstId(0));
+        builder.emit_load(&mut context, Value::Inst(InstId(0)));
 
         assert_eq!(context.funcs[func_id.0].body[0].body.len(), 3);
         assert_eq!(context.funcs[func_id.0].body[0].body[0], Inst::Alloca);
         assert_eq!(
             context.funcs[func_id.0].body[0].body[1],
             Inst::Call {
-                callee: InstId(0),
+                callee: Value::Inst(InstId(0)),
                 args: Vec::new(),
             }
         );
         assert_eq!(
             context.funcs[func_id.0].body[0].body[2],
-            Inst::Load { ptr: InstId(0) }
+            Inst::Load {
+                ptr: Value::Inst(InstId(0))
+            }
         );
     }
 }
