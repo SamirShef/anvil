@@ -254,6 +254,24 @@ impl IRBuilder {
         ctx.create_bb_with_name(func_id, name.into())
     }
 
+    fn emit_inst(
+        &mut self,
+        ctx: &mut Context,
+        inst: Inst,
+        name: impl Into<String>,
+    ) -> Option<InstId> {
+        self.cur_bb?;
+
+        let bb = ctx.funcs[self.cur_func.unwrap().0]
+            .body
+            .get_mut(self.cur_bb.unwrap().0)
+            .unwrap();
+        let id = bb.insert_inst(inst);
+        ctx.inst_names.insert(id.unwrap(), name.into());
+
+        id
+    }
+
     pub fn emit_add(&mut self, ctx: &mut Context, left: InstId, right: InstId) -> Option<InstId> {
         let name = self.cur_unnamed_local_idx.to_string();
         self.emit_add_with_name(ctx, left, right, name)
@@ -266,20 +284,15 @@ impl IRBuilder {
         right: InstId,
         name: impl Into<String>,
     ) -> Option<InstId> {
-        self.cur_bb?;
-
-        let bb = ctx.funcs[self.cur_func.unwrap().0]
-            .body
-            .get_mut(self.cur_bb.unwrap().0)
-            .unwrap();
-        let id = bb.insert_inst(Inst::Binary {
-            kind: BinaryKind::Add,
-            left,
-            right,
-        });
-        ctx.inst_names.insert(id.unwrap(), name.into());
-
-        id
+        self.emit_inst(
+            ctx,
+            Inst::Binary {
+                kind: BinaryKind::Add,
+                left,
+                right,
+            },
+            name,
+        )
     }
 }
 
